@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive Land Map — LandVault AI{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet Map CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+.map-page {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.map-hero {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 24px 28px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-secondary);
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.map-hero h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  color: #FFFFFF;
+}
+.map-hero p {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 0;
+  line-height: 1.5;
+}
+.map-legend {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+}
+.legend-dot.verified { background: var(--color-emerald); }
+.legend-dot.pending { background: var(--color-amber); }
+.legend-dot.review { background: #3b82f6; }
+.legend-dot.anomaly { background: var(--color-danger); }
+
+.map-filter-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.map-filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+@media (max-width: 1024px) {
+  .map-filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .map-filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.filter-group label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.filter-group input, .filter-group select {
+  height: 38px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: #FFFFFF;
+  color: var(--color-primary);
+}
+.filter-group input:focus, .filter-group select:focus {
+  outline: none;
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 2px rgba(15, 139, 141, 0.15);
+}
+
+.map-container-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+#landMap {
+  width: 100%;
+  height: 580px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  z-index: 10;
+}
+.map-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+}
+.parcel-popup {
+  font-family: inherit;
+  color: var(--color-primary);
+  line-height: 1.45;
+  min-width: 240px;
+}
+.parcel-popup-header {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.parcel-popup-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+.parcel-popup-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+}
+.parcel-popup-label {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+.parcel-popup-val {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.approx-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  font-size: 10.5px;
+  color: #92400e;
+  line-height: 1.35;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-page">
+
+  <!-- HEADER HERO -->
+  <div class="map-hero">
+    <div>
+      <h1 data-i18n="map_hero_title">Interactive Cadastral Land Map</h1>
+      <p data-i18n="map_hero_desc">Explore verified land parcels, revenue villages, and survey records across Tamil Nadu</p>
+    </div>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot verified"></div> <span data-i18n="legend_verified">Verified / Approved</span></div>
+      <div class="legend-item"><div class="legend-dot pending"></div> <span data-i18n="legend_pending">Pending Review</span></div>
+      <div class="legend-item"><div class="legend-dot review"></div> <span data-i18n="legend_review">Under Review</span></div>
+      <div class="legend-item"><div class="legend-dot anomaly"></div> <span data-i18n="legend_anomaly">Anomaly / Rejected</span></div>
+    </div>
+  </div>
+
+  <!-- LOCATION SEARCH & FILTER BAR -->
+  <div class="map-filter-card">
+    <div class="map-filter-grid">
+      <div class="filter-group">
+        <label data-i18n="lbl_search_loc">Search Parcel or Owner</label>
+        <input type="text" id="mapSearchInput" placeholder="Owner, Survey #, Patta #, or Village..." />
+      </div>
+
+      <div class="filter-group">
+        <label data-i18n="lbl_filter_district">District</label>
+        <select id="mapDistrictSelect">
+          <option value="">All Districts</option>
+          {% for d in districts %}
+          <option value="{{ d }}">{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label data-i18n="lbl_filter_taluk">Taluk</label>
+        <input type="text" id="mapTalukInput" placeholder="e.g. Attur, Pollachi..." />
+      </div>
+
+      <div class="filter-group">
+        <label data-i18n="lbl_filter_village">Village</label>
+        <input type="text" id="mapVillageInput" placeholder="e.g. Attur Rural..." />
+      </div>
+
+      <div class="filter-group">
+        <label data-i18n="lbl_filter_status">Status</label>
+        <select id="mapStatusSelect">
+          <option value="">All Statuses</option>
+          <option value="VERIFIED">Verified / Approved</option>
+          <option value="PENDING">Pending</option>
+          <option value="UNDER_REVIEW">Under Review</option>
+          <option value="POTENTIAL_ANOMALY">Potential Anomaly</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
+      </div>
+
+      <div class="filter-group" style="justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" id="btnResetMapFilters" style="height:38px; padding:0 16px;">
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE LEAFLET MAP CONTAINER -->
+  <div class="map-container-card">
+    <div id="landMap"></div>
+    <div class="map-status-bar">
+      <div>
+        <strong>Plotted Parcels:</strong> <span id="mapParcelCount" style="color:var(--color-teal); font-weight:700;">0</span> records found
+      </div>
+      <div>
+        <span style="color:#d97706; font-weight:600;">ℹ Location Notice:</span> Plotted points represent revenue village / taluk centroids. Exact ground boundary demarcation requires physical ground survey coordinates.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Leaflet map centered on Tamil Nadu
+  const map = L.map('landMap', {
+    center: [11.1271, 78.6569], // Tamil Nadu center
+    zoom: 7,
+    minZoom: 6,
+    maxZoom: 17
+  });
+
+  // OpenStreetMap tile layer (Free, fast, zero external API key)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · LandVault AI Cadastre',
+    maxZoom: 19
+  }).addTo(map);
+
+  let markersLayer = L.layerGroup().addTo(map);
+  let allLocations = [];
+
+  // Custom SVG Markers based on verification status
+  function createCustomIcon(status) {
+    let color = '#0F8B8D'; // Default teal
+    if (status === 'VERIFIED' || status === 'APPROVED') {
+      color = '#16865B'; // Emerald
+    } else if (status === 'PENDING') {
+      color = '#D99A24'; // Amber
+    } else if (status === 'UNDER_REVIEW' || status === 'NEEDS_REVIEW') {
+      color = '#2563EB'; // Blue
+    } else if (status === 'POTENTIAL_ANOMALY' || status === 'REJECTED') {
+      color = '#DC2626'; // Red
+    }
+
+    const svgIcon = `
+      <svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 0C6.268 0 0 6.268 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.268 21.732 0 14 0Z" fill="${color}" stroke="#FFFFFF" stroke-width="1.8"/>
+        <circle cx="14" cy="14" r="5" fill="#FFFFFF"/>
+      </svg>
+    `;
+
+    return L.divIcon({
+      className: 'custom-land-marker',
+      html: svgIcon,
+      iconSize: [28, 36],
+      iconAnchor: [14, 36],
+      popupAnchor: [0, -34]
+    });
+  }
+
+  async function loadMapData() {
+    const searchVal = document.getElementById('mapSearchInput').value.trim();
+    const districtVal = document.getElementById('mapDistrictSelect').value;
+    const talukVal = document.getElementById('mapTalukInput').value.trim();
+    const villageVal = document.getElementById('mapVillageInput').value.trim();
+    const statusVal = document.getElementById('mapStatusSelect').value;
+
+    const params = new URLSearchParams();
+    if (searchVal) params.append('q', searchVal);
+    if (districtVal) params.append('district', districtVal);
+    if (talukVal) params.append('taluk', talukVal);
+    if (villageVal) params.append('village', villageVal);
+    if (statusVal) params.append('status', statusVal);
+
+    try {
+      const res = await fetch('/api/land-locations?' + params.toString());
+      const data = await res.json();
+      if (!data.success) return;
+
+      allLocations = data.locations || [];
+      renderMarkers(allLocations);
+    } catch (err) {
+      console.error('Failed to load map data:', err);
+    }
+  }
+
+  function renderMarkers(locations) {
+    markersLayer.clearLayers();
+    document.getElementById('mapParcelCount').textContent = locations.length;
+
+    if (locations.length === 0) return;
+
+    const bounds = [];
+
+    locations.forEach(loc => {
+      const lat = parseFloat(loc.latitude);
+      const lng = parseFloat(loc.longitude);
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      bounds.push([lat, lng]);
+
+      let statusPillClass = 'pending';
+      if (loc.status === 'VERIFIED' || loc.status === 'APPROVED') statusPillClass = 'verified';
+      else if (loc.status === 'UNDER_REVIEW') statusPillClass = 'saffron';
+      else if (loc.status === 'REJECTED' || loc.status === 'POTENTIAL_ANOMALY') statusPillClass = 'danger';
+
+      const popupHtml = `
+        <div class="parcel-popup">
+          <div class="parcel-popup-header">
+            <div style="font-size:11px; font-weight:700; color:var(--color-teal); font-family:monospace;">${loc.record_number}</div>
+            <div class="parcel-popup-title">${loc.owner_name}</div>
+          </div>
+          <div class="parcel-popup-row">
+            <span class="parcel-popup-label">Survey / Patta:</span>
+            <span class="parcel-popup-val">#${loc.survey_number} · Patta #${loc.patta_number}</span>
+          </div>
+          <div class="parcel-popup-row">
+            <span class="parcel-popup-label">Location:</span>
+            <span class="parcel-popup-val">${loc.village}, ${loc.taluk} (${loc.district})</span>
+          </div>
+          <div class="parcel-popup-row">
+            <span class="parcel-popup-label">Land Area:</span>
+            <span class="parcel-popup-val">${loc.land_area}</span>
+          </div>
+          <div class="parcel-popup-row">
+            <span class="parcel-popup-label">Status:</span>
+            <span class="status-pill ${statusPillClass}" style="font-size:10.5px; padding:2px 6px;">${loc.status}</span>
+          </div>
+          ${loc.is_approx_location ? `
+            <div class="approx-badge">
+              ⚠ Approximate location (Revenue Village Centroid). Ground cadastral demarcation pending.
+            </div>
+          ` : ''}
+          <div style="margin-top:10px; text-align:right;">
+            <a href="/record/${loc.record_number}" target="_blank" class="btn btn-primary btn-sm" style="font-size:11px; padding:4px 10px; display:inline-block; text-decoration:none;">
+              View Details →
+            </a>
+          </div>
+        </div>
+      `;
+
+      const marker = L.marker([lat, lng], {
+        icon: createCustomIcon(loc.status)
+      }).bindPopup(popupHtml);
+
+      markersLayer.addLayer(marker);
+    });
+
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+    }
+  }
+
+  // Filter input event listeners
+  let debounceTimeout = null;
+  function triggerFilter() {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+      loadMapData();
+    }, 250);
+  }
+
+  document.getElementById('mapSearchInput').addEventListener('input', triggerFilter);
+  document.getElementById('mapDistrictSelect').addEventListener('change', loadMapData);
+  document.getElementById('mapTalukInput').addEventListener('input', triggerFilter);
+  document.getElementById('mapVillageInput').addEventListener('input', triggerFilter);
+  document.getElementById('mapStatusSelect').addEventListener('change', loadMapData);
+
+  document.getElementById('btnResetMapFilters').addEventListener('click', () => {
+    document.getElementById('mapSearchInput').value = '';
+    document.getElementById('mapDistrictSelect').value = '';
+    document.getElementById('mapTalukInput').value = '';
+    document.getElementById('mapVillageInput').value = '';
+    document.getElementById('mapStatusSelect').value = '';
+    loadMapData();
+  });
+
+  // Initial load
+  loadMapData();
+});
+</script>
+{% endblock %}

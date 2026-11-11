@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Revenue Officer Dashboard — LandVault AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Good Morning, Officer {{ session.get('full_name', 'Sundaram') }}</h1>
+    <p>AI-assisted cadastral verification, document ingestion & jurisdictional revenue intelligence.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('process_document') }}" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"/><polyline points="14 2 14 8 20 8" stroke="currentColor"/><line x1="12" y1="18" x2="12" y2="12" stroke="currentColor"/><line x1="9" y1="15" x2="15" y2="15" stroke="currentColor"/></svg>
+      Process Document
+    </a>
+    <a href="{{ url_for('verification_queue') }}" class="btn btn-secondary">
+      <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin-right:6px;"><polyline points="9 11 12 14 22 4" stroke="currentColor"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor"/></svg>
+      Review Queue
+    </a>
+  </div>
+</div>
+
+<!-- KPI METRIC CARDS -->
+<div class="stats-grid">
+  <!-- Card 1: Total Records -->
+  <div class="stat-card">
+    <div class="stat-top">
+      <span class="stat-title">Total Records Ingested</span>
+      <div class="stat-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="stat-value">1,250</div>
+    <div class="stat-trend">
+      <span class="trend-up">↑ 12.4%</span> vs last month
+    </div>
+  </div>
+
+  <!-- Card 2: Verified -->
+  <div class="stat-card verified">
+    <div class="stat-top">
+      <span class="stat-title">Verified & Authenticated</span>
+      <div class="stat-icon green">
+        <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor"/><polyline points="22 4 12 14.01 9 11.01" stroke="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="stat-value">980</div>
+    <div class="stat-trend">
+      <span class="trend-up">78.4%</span> verified rate
+    </div>
+  </div>
+
+  <!-- Card 3: Pending Review -->
+  <div class="stat-card pending">
+    <div class="stat-top">
+      <span class="stat-title">Pending Verification</span>
+      <div class="stat-icon amber">
+        <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;"><circle cx="12" cy="12" r="10" stroke="currentColor"/><polyline points="12 6 12 12 16 14" stroke="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="stat-value">170</div>
+    <div class="stat-trend">
+      <span>13.6%</span> active queue
+    </div>
+  </div>
+
+  <!-- Card 4: Potential Anomalies -->
+  <div class="stat-card anomaly">
+    <div class="stat-top">
+      <span class="stat-title">Potential Anomalies</span>
+      <div class="stat-icon red">
+        <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="stat-value">65</div>
+    <div class="stat-trend">
+      <span class="trend-down">5.2%</span> requires ground check
+    </div>
+  </div>
+
+  <!-- Card 5: Duplicate Candidates -->
+  <div class="stat-card duplicate">
+    <div class="stat-top">
+      <span class="stat-title">Duplicate Candidates</span>
+      <div class="stat-icon purple">
+        <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="stat-value">35</div>
+    <div class="stat-trend">
+      <span>2.8%</span> cadastral overlap
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS SECTION -->
+<div class="charts-grid">
+  <!-- Line Chart: Records Timeline -->
+  <div class="chart-card">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title">Records Processed Over Time</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;">Monthly digitization volume & officer verification velocity</p>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="recordsTimelineChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Donut Chart: Status Breakdown -->
+  <div class="chart-card">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title">Verification Status</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;">Cadastral parcel compliance ratio</p>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="statusDonutChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- DISTRICT DISTRIBUTION & PRIORITY QUEUE -->
+<div class="charts-grid" style="grid-template-columns: 1.8fr 1.2fr; margin-bottom: 28px;">
+  <!-- Bar Chart: Records by District -->
+  <div class="chart-card">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title">Records by District</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;">Jurisdictional distribution across Tamil Nadu revenue divisions</p>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="districtBarChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Priority Queue Summary Card -->
+  <div class="chart-card">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title">Priority Verification Queue</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;">Cases requiring immediate officer review</p>
+      </div>
+    </div>
+    
+    <div class="priority-widget">
+      <div class="priority-box high">
+        <div class="priority-count">12</div>
+        <div class="priority-label">HIGH PRIORITY</div>
+      </div>
+      <div class="priority-box med">
+        <div class="priority-count">35</div>
+        <div class="priority-label">MEDIUM PRIORITY</div>
+      </div>
+      <div class="priority-box low">
+        <div class="priority-count">123</div>
+        <div class="priority-label">LOW PRIORITY</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--color-border);">
+      <div style="font-size:12px; font-weight:700; color:var(--color-primary); margin-bottom:8px;">AI SYSTEM HEALTH & OCR ENGINE</div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+        <span style="color:var(--color-text-muted);">Local Tesseract Engine:</span>
+        <span style="font-weight:700; color:var(--color-emerald);">● Online (v5.5 Local)</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+        <span style="color:var(--color-text-muted);">OCR Language Packs:</span>
+        <span style="font-weight:600; color:var(--color-primary);">English (eng) + Tamil (tam)</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+        <span style="color:var(--color-text-muted);">External API Keys Required:</span>
+        <span style="font-weight:700; color:var(--color-teal);">None (100% Offline & Private)</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px;">
+        <span style="color:var(--color-text-muted);">Database Integrity:</span>
+        <span style="font-weight:600; color:var(--color-emerald);">SQLite Connected</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECENT INGESTED RECORDS TABLE -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3 class="card-title">Recent Digitized Land Records</h3>
+      <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;">Latest records processed by AI pipeline awaiting or completed verification</p>
+    </div>
+    <a href="{{ url_for('land_records') }}" class="btn btn-secondary btn-sm">View All Records</a>
+  </div>
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Record ID</th>
+          <th>Owner Name</th>
+          <th>Survey No</th>
+          <th>Patta No</th>
+          <th>Village / District</th>
+          <th>Confidence</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recent_records %}
+        <tr>
+          <td>
+            <a href="{{ url_for('record_detail', record_num=r.record_number) }}" style="color:var(--color-teal); font-family:monospace; font-weight:700;">
+              {{ r.record_number }}
+            </a>
+          </td>
+          <td><strong>{{ r.owner_name }}</strong></td>
+          <td><span style="font-family:monospace;">{{ r.survey_number }}</span></td>
+          <td><span style="font-family:monospace;">{{ r.patta_number }}</span></td>
+          <td>{{ r.village }}, {{ r.district }}</td>
+          <td>
+            <span class="conf-pill {{ 'conf-high' if r.confidence_score >= 85 else ('conf-med' if r.confidence_score >= 75 else 'conf-low') }}">
+              {{ r.confidence_score }}%
+            </span>
+          </td>
+          <td>
+            <span class="status-pill {{ 'verified' if r.status == 'VERIFIED' else ('potential_anomaly' if r.status == 'POTENTIAL_ANOMALY' else ('duplicate_candidate' if r.status == 'DUPLICATE_CANDIDATE' else 'pending')) }}">
+              {{ r.status }}
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('record_detail', record_num=r.record_number) }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">
+              Inspect
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

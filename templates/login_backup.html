@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Login - LandVault AI{% endblock %}
+
+{% block content %}
+
+<style>
+.login-wrapper {
+    max-width: 440px;
+    margin: 50px auto;
+}
+
+.login-card {
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid #e1e5ec;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+}
+
+.login-heading {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-heading h1 {
+    color: var(--color-primary);
+    margin-bottom: 10px;
+}
+
+.login-heading p {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.login-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.login-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 18px;
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #168b87;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background: #10716e;
+}
+
+.login-note {
+    margin-top: 20px;
+    padding: 12px;
+    background: #f3f7fa;
+    border-radius: 6px;
+    color: #515c6d;
+    font-size: 13px;
+    line-height: 1.6;
+}
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="login-heading">
+            <h1>LandVault AI</h1>
+            <p>Sign in to manage and review land documents.</p>
+        </div>
+
+        <form class="login-form" method="POST" action="{{ url_for('login') }}">
+
+            <label for="username">Username</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Enter your username"
+                autocomplete="username"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit" class="login-button">
+                Sign In
+            </button>
+
+        </form>
+
+        <div style="margin-top: 20px; padding-top: 18px; border-top: 1px dashed #d1d5db; text-align: center;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                ⚡ 1-Click Instant Demo Login
+            </div>
+            <div style="display: flex; gap: 10px; flex-direction: column;">
+                <a href="{{ url_for('quick_login', user_type='officer') }}" class="btn btn-primary" style="text-align: center; text-decoration: none; padding: 10px; font-size: 13.5px;">
+                    🛡 Revenue Officer (Ramesh V. Sundaram)
+                </a>
+                <a href="{{ url_for('quick_login', user_type='citizen') }}" class="btn btn-secondary" style="text-align: center; text-decoration: none; padding: 10px; font-size: 13.5px;">
+                    👤 Citizen / Land Owner (Ananya R. Sharma)
+                </a>
+            </div>
+        </div>
+
+        <div class="login-note">
+            Demo Credentials:<br>
+            Officer: <code>officer@landvault.gov.in</code> / <code>officer123</code><br>
+            Citizen: <code>citizen@example.com</code> / <code>citizen123</code>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

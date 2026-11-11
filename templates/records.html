@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Land Records - LandVault AI{% endblock %}
+
+{% block content %}
+
+<style>
+.records-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.records-header h1 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.records-header p {
+    color: var(--color-text-muted);
+}
+
+.records-card {
+    background: white;
+    border: 1px solid #e1e5ec;
+    border-radius: 10px;
+    padding: 24px;
+    overflow-x: auto;
+}
+
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+.records-table th,
+.records-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.records-table th {
+    background: #f5f7fa;
+    font-weight: 600;
+}
+
+.records-table tr:hover {
+    background: #f9fafb;
+}
+
+.records-button {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #168b87;
+    color: white;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.records-button:hover {
+    background: #10716e;
+}
+
+.view-button {
+    padding: 6px 10px;
+    background: #e8f5f4;
+    color: #10716e;
+    border-radius: 5px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #6b7280;
+}
+
+@media (max-width: 600px) {
+    .records-card {
+        padding: 12px;
+    }
+}
+</style>
+
+<div class="records-page">
+
+    <div class="records-header">
+        <div>
+            <h1 data-i18n="land_records">Land Records</h1>
+            <p data-i18n="search_page_subtitle">View and review processed land documents.</p>
+        </div>
+
+        <a class="records-button" href="{{ url_for('process') }}">
+            <span data-i18n="btn_upload_doc">+ Upload Document</span>
+        </a>
+    </div>
+
+    <div class="records-card">
+
+        <h2 data-i18n="all_records_title">All Records</h2>
+
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th data-i18n="th_record_id">Record ID</th>
+                    <th data-i18n="th_owner_name">Owner Name</th>
+                    <th data-i18n="survey_number">Survey Number</th>
+                    <th data-i18n="doc_type">Document Type</th>
+                    <th data-i18n="district">District</th>
+                    <th data-i18n="th_status">Status</th>
+                    <th data-i18n="th_action">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if records is defined and records %}
+                    {% for record in records %}
+                    <tr>
+                        <td><span style="font-family:monospace; font-weight:700; color:var(--color-teal);">{{ record.record_number|default(record.id) }}</span></td>
+
+                        <td>
+                            <strong>{{ record.owner_name|default('Not found in document', true) }}</strong>
+                        </td>
+
+                        <td>
+                            <span style="font-family:monospace;">{{ record.survey_number|default('Not found in document', true) }}</span>
+                        </td>
+
+                        <td>
+                            {{ record.document_type|default('Unknown', true) }}
+                        </td>
+
+                        <td>
+                            {{ record.district|default('Not found in document', true) }}
+                        </td>
+
+                        <td>
+                            <span class="status-pill {{ 'verified' if record.status == 'VERIFIED' else ('potential_anomaly' if record.status == 'POTENTIAL_ANOMALY' else ('duplicate_candidate' if record.status == 'DUPLICATE_CANDIDATE' else 'pending')) }}">
+                                {{ record.status|default('Pending Review', true) }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <a class="view-button"
+                               href="{{ url_for('record_detail', record_num=record.record_number) }}">
+                                <span data-i18n="btn_view_details">View Details</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-message" data-i18n="empty_submitted_records">
+                            No land records available.
+                            Upload a document to get started.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Process Land Document — LandVault AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Process Land Document</h1>
+    <p>AI ingestion, computer vision preprocessing, local Tesseract OCR & heuristic cadastre validation.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('verification_queue') }}" class="btn btn-secondary">
+      <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin-right:6px;"><polyline points="9 11 12 14 22 4" stroke="currentColor"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor"/></svg>
+      View Verification Queue
+    </a>
+  </div>
+</div>
+
+<div class="upload-container">
+  <!-- QUICK SAMPLE SELECTOR -->
+  <div class="sample-docs-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="font-size:14px; font-weight:700; color:var(--color-primary);">⚡ Quick Sample Documents (Instant 1-Click Verification)</h3>
+      <span style="font-size:12px; color:var(--color-text-muted);">Choose a preset or upload your own file below</span>
+    </div>
+    
+    <div class="sample-cards-grid">
+      <!-- Sample 1 -->
+      <div class="sample-card" data-filename="sample_patta_passbook_salem.png" data-name="Sample 1: Standard Patta">
+        <div class="sample-thumb">PATTA</div>
+        <div class="sample-info">
+          <h4>Sample 1: Standard Patta</h4>
+          <p>Salem District · Form No. 1 · High Clarity</p>
+        </div>
+      </div>
+
+      <!-- Sample 2 -->
+      <div class="sample-card" data-filename="sample_deed_with_anomaly.png" data-name="Sample 2: Document with Anomaly">
+        <div class="sample-thumb" style="color:var(--color-danger);">ANOMALY</div>
+        <div class="sample-info">
+          <h4>Sample 2: Document with Anomaly</h4>
+          <p>Madurai Sale Deed · Complex Sub-division</p>
+        </div>
+      </div>
+
+      <!-- Sample 3 -->
+      <div class="sample-card" data-filename="sample_duplicate_parcel.png" data-name="Sample 3: Duplicate Candidate">
+        <div class="sample-thumb" style="color:var(--color-violet);">DUP</div>
+        <div class="sample-info">
+          <h4>Sample 3: Duplicate Candidate</h4>
+          <p>Cadastral overlap with LV-2026-00125</p>
+        </div>
+      </div>
+
+      <!-- Sample 4: Text-based PDF -->
+      <div class="sample-card" data-filename="sample_chitta_coimbatore.pdf" data-name="Sample 4: Text PDF Chitta">
+        <div class="sample-thumb" style="color:var(--color-teal);">PDF</div>
+        <div class="sample-info">
+          <h4>Sample 4: Text PDF Chitta</h4>
+          <p>Coimbatore · Digital Revenue Extract</p>
+        </div>
+      </div>
+
+      <!-- Sample 5: Scanned PDF -->
+      <div class="sample-card" data-filename="sample_scanned_patta_salem.pdf" data-name="Sample 5: Scanned PDF Patta">
+        <div class="sample-thumb" style="color:var(--color-amber);">SCAN</div>
+        <div class="sample-info">
+          <h4>Sample 5: Scanned PDF Patta</h4>
+          <p>Multi-modal PDF to Image + OCR</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD DROPZONE -->
+  <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff" style="display: none;">
+    <div class="dropzone-icon">
+      <svg viewBox="0 0 24 24" fill="none" style="width:32px;height:32px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"/><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2"/></svg>
+    </div>
+    <div class="dropzone-title">Drag & Drop Land Records Here or Browse Files</div>
+    <div class="dropzone-subtitle">Supported formats: PDF (scanned & text), PNG, JPG, JPEG (Max 15MB) · Tamil & English documents supported</div>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+      Browse Computer Files
+    </button>
+  </div>
+
+  <!-- SELECTED FILE CARD -->
+  <div class="card" id="uploadedFileCard" style="display: none; padding: 18px 24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="width:44px; height:44px; border-radius:8px; background:var(--color-teal-light); color:var(--color-teal); display:flex; align-items:center; justify-content:center;">
+          <svg viewBox="0 0 24 24" fill="none" style="width:24px;height:24px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"/><polyline points="14 2 14 8 20 8" stroke="currentColor"/></svg>
+        </div>
+        <div>
+          <h4 id="docFileName" style="font-size:15px; font-weight:700; color:var(--color-primary); margin:0;">filename.png</h4>
+          <p style="font-size:12px; color:var(--color-text-muted); margin:4px 0 0 0;">
+            Type: <span id="docFileType" style="font-weight:600;">Image</span> · 
+            Size: <span id="docFileSize" style="font-weight:600;">1.2 MB</span> · 
+            Uploaded: <span id="docUploadTime" style="font-weight:600;">Just now</span>
+          </p>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary" id="startProcessingBtn">
+          Start AI Processing
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9-STAGE PIPELINE TIMELINE -->
+  <div class="card" id="pipelineSection" style="display: none; padding: 24px;">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title">9-Stage AI Ingestion & Verification Pipeline</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;">Real-time execution of local computer vision, Tesseract OCR, and cadastral heuristic analysis</p>
+      </div>
+    </div>
+
+    <div class="pipeline-timeline">
+      <div class="timeline-step pending" id="step-1">
+        <div class="step-circle">1</div>
+        <div class="step-details">
+          <div class="step-name">Document Upload & Sandbox Sanitization</div>
+          <div class="step-status">Waiting to start...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-2">
+        <div class="step-circle">2</div>
+        <div class="step-details">
+          <div class="step-name">Document Classification & Structure Analysis</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-3">
+        <div class="step-circle">3</div>
+        <div class="step-details">
+          <div class="step-name">Image Preprocessing & Bilateral Denoising</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-4">
+        <div class="step-circle">4</div>
+        <div class="step-details">
+          <div class="step-name">Local Tesseract OCR Extraction (English + Tamil)</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-5">
+        <div class="step-circle">5</div>
+        <div class="step-details">
+          <div class="step-name">Smart Field Identification & Revenue Heuristics</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-6">
+        <div class="step-circle">6</div>
+        <div class="step-details">
+          <div class="step-name">Intelligent Validation & Revenue Gazetteer Check</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-7">
+        <div class="step-circle">7</div>
+        <div class="step-details">
+          <div class="step-name">Statistical Confidence Matrix Calculation</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-8">
+        <div class="step-circle">8</div>
+        <div class="step-details">
+          <div class="step-name">Anomaly & Cadastral Duplicate Detection</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="timeline-step pending" id="step-9">
+        <div class="step-circle">9</div>
+        <div class="step-details">
+          <div class="step-name">Human-in-the-Loop Officer Review & Verification</div>
+          <div class="step-status">Waiting...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPLIT-SCREEN OCR INSPECTION & OFFICER ACTION -->
+  <div id="splitScreenSection" style="display: none;">
+    <div class="split-screen-grid">
+      <!-- LEFT COLUMN: DOCUMENT PARCHMENT VIEWER -->
+      <div class="doc-viewer-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="font-size:14px; font-weight:700; color:var(--color-primary); margin:0;">Uploaded Document Viewer</h3>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnZoomIn" title="Zoom In">+</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnZoomOut" title="Zoom Out">-</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnZoomReset" title="Reset Zoom">Reset</button>
+          </div>
+        </div>
+        
+        <div class="doc-preview-wrap">
+          <img id="splitDocImage" src="" alt="Document Preview">
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: EXTRACTED FIELDS & OFFICER WORKSPACE -->
+      <div>
+        <!-- CONFIDENCE GAUGE BOX -->
+        <div class="confidence-gauge-box">
+          <div class="gauge-circle" id="gaugeCircle" style="--score: 88;">
+            <div class="gauge-inner">
+              <span class="gauge-val" id="gaugeScore">88%</span>
+              <span class="gauge-label">CONFIDENCE</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px; font-weight:700; color:var(--color-saffron); text-transform:uppercase;">
+              Record ID: <span id="reviewRecordNumber" style="color:#FFF; font-family:monospace;">LV-2026-XXXXX</span>
+            </div>
+            <h3 style="font-size:18px; font-weight:800; margin:4px 0 6px 0;">AI Extraction Quality Assessment</h3>
+            <p id="aiRecText" style="font-size:12.5px; opacity:0.9; margin:0; line-height:1.4;">
+              All mandatory fields successfully extracted. Conforms to standard cadastre format.
+            </p>
+          </div>
+        </div>
+
+        <!-- POTENTIAL ANOMALY ALERT -->
+        <div class="anomaly-box" id="anomalyCard" style="display: none;">
+          <h4 style="font-size:13.5px; font-weight:700; color:var(--color-danger); margin:0 0 8px 0; display:flex; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor"/></svg>
+            Potential Anomalies Detected (Manual Verification Recommended)
+          </h4>
+          <ul id="anomalyList" style="margin:0; padding-left:18px; font-size:12.5px; color:var(--color-danger); line-height:1.6;">
+          </ul>
+        </div>
+
+        <!-- DUPLICATE CANDIDATE BANNER -->
+        <div class="card" id="duplicateCard" style="display: none; border-left:4px solid var(--color-amber); background:var(--color-saffron-light); padding:16px; margin-bottom:20px;">
+          <h4 style="font-size:13.5px; font-weight:700; color:var(--color-primary); margin:0 0 6px 0;">
+            ⚠ Possible Duplicate Land Record Found
+          </h4>
+          <p style="font-size:12.5px; margin:0 0 10px 0;">
+            Cadastral similarity of <strong id="dupSimilarity">94%</strong> with existing record <strong id="dupRecordId" style="font-family:monospace;">LV-2026-00125</strong>. Matching fields: <span id="dupMatchingFields">Owner Name, Survey Number</span>.
+          </p>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnViewExistingDup">
+            View Existing Record
+          </button>
+        </div>
+
+        <!-- EDITABLE EXTRACTED FIELDS -->
+        <div class="card" style="padding: 20px; margin-bottom: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3 style="font-size:14px; font-weight:700; color:var(--color-primary); margin:0;">Smart Extracted Fields (Editable)</h3>
+            <span style="font-size:11px; color:var(--color-text-muted);">Inspect and edit OCR results if necessary</span>
+          </div>
+
+          <div class="fields-table">
+            <div class="field-row">
+              <div class="field-meta"><label>Landowner Name</label></div>
+              <div class="field-input-box"><input type="text" id="f_owner_name" placeholder="Owner Name"></div>
+              <span class="field-conf-badge conf-high" id="f_owner_name_conf">92%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Survey Number</label></div>
+              <div class="field-input-box"><input type="text" id="f_survey_number" placeholder="Survey Number (e.g. 184/2A)"></div>
+              <span class="field-conf-badge conf-high" id="f_survey_number_conf">91%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Subdivision Number</label></div>
+              <div class="field-input-box"><input type="text" id="f_subdivision_number" placeholder="Subdivision (e.g. 2A)"></div>
+              <span class="field-conf-badge conf-high" id="f_subdivision_number_conf">90%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Patta Number</label></div>
+              <div class="field-input-box"><input type="text" id="f_patta_number" placeholder="Patta Number"></div>
+              <span class="field-conf-badge conf-high" id="f_patta_number_conf">95%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>District</label></div>
+              <div class="field-input-box"><input type="text" id="f_district" placeholder="District"></div>
+              <span class="field-conf-badge conf-high" id="f_district_conf">97%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Taluk</label></div>
+              <div class="field-input-box"><input type="text" id="f_taluk" placeholder="Taluk"></div>
+              <span class="field-conf-badge conf-high" id="f_taluk_conf">89%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Village</label></div>
+              <div class="field-input-box"><input type="text" id="f_village" placeholder="Village"></div>
+              <span class="field-conf-badge conf-high" id="f_village_conf">86%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Land Area</label></div>
+              <div class="field-input-box"><input type="text" id="f_land_area" placeholder="Land Area"></div>
+              <span class="field-conf-badge conf-high" id="f_land_area_conf">91%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Document Type</label></div>
+              <div class="field-input-box"><input type="text" id="f_document_type" placeholder="Document Type"></div>
+              <span class="field-conf-badge conf-high" id="f_document_type_conf">96%</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-meta"><label>Document Date</label></div>
+              <div class="field-input-box"><input type="text" id="f_document_date" placeholder="DD-MM-YYYY"></div>
+              <span class="field-conf-badge conf-high" id="f_document_date_conf">90%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VALIDATION CHECKS LIST -->
+        <div class="card" style="padding: 18px; margin-bottom: 20px;">
+          <h4 style="font-size:13.5px; font-weight:700; color:var(--color-primary); margin:0 0 10px 0;">
+            Intelligent Validation Checklist
+          </h4>
+          <div id="validationChecksList"></div>
+        </div>
+
+        <!-- OFFICER VERIFICATION ACTIONS -->
+        <div class="card" style="padding: 20px;">
+          <h4 style="font-size:14px; font-weight:700; color:var(--color-primary); margin:0 0 12px 0;">
+            Officer Verification & Attestation
+          </h4>
+          
+          <div style="margin-bottom:14px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+              <input type="checkbox" id="officerReviewedCheck" style="width:16px;height:16px;">
+              <span>I have reviewed the extracted information against the original cadastral document</span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:var(--color-text-muted); margin-bottom:6px;">Officer Remarks / Endorsement</label>
+            <textarea id="officerRemarksInput" class="form-control" rows="2" placeholder="e.g. Demarcation and revenue survey matching verified. Recommended for digital certification." style="width:100%; border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:10px; font-size:13px;"></textarea>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" id="btnApproveRecord" style="background:var(--color-emerald); border-color:var(--color-emerald);">
+              ✓ Approve Record
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnSendForReview" style="color:var(--color-amber);">
+              ⚠ Flag for Clarification
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnRejectRecord" style="color:var(--color-danger);">
+              ✕ Reject Record
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/processing.js') }}"></script>
+{% endblock %}

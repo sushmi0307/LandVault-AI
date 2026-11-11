@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Verification Certificates — LandVault AI{% endblock %}
+
+{% block content %}
+<style>
+.report-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.report-heading {
+    margin-bottom: 24px;
+}
+
+.report-heading h1 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.report-heading p {
+    color: var(--color-text-muted);
+}
+
+.certificate {
+    background: white;
+    color: #20243a;
+    border: 1px solid #d9dee8;
+    border-top: 5px solid #168b87;
+    border-radius: 10px;
+    padding: 35px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.certificate-header {
+    text-align: center;
+    border-bottom: 1px solid #d9dee8;
+    padding-bottom: 22px;
+    margin-bottom: 24px;
+}
+
+.certificate-header h2 {
+    margin-bottom: 10px;
+    font-size: 25px;
+    color: #20243a;
+}
+
+.certificate-header p {
+    color: #667085;
+    font-size: 14px;
+}
+
+.demo-label {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 7px 12px;
+    background: #fff4d6;
+    color: #825b00;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.demo-label.verified {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+
+.details-table td {
+    padding: 13px;
+    border: 1px solid #e1e5ec;
+    text-align: left;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.details-table td:first-child {
+    width: 40%;
+    font-weight: 600;
+    background: #f7f9fc;
+}
+
+.disclaimer {
+    padding: 15px;
+    background: #f3f7fa;
+    border-radius: 6px;
+    color: #515c6d;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.report-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    gap: 12px;
+}
+
+.download-button {
+    border: none;
+    border-radius: 6px;
+    padding: 12px 20px;
+    background: #168b87;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background: #10716e;
+}
+
+@media print {
+    body * { visibility: hidden; }
+    #certificate, #certificate * { visibility: visible; }
+    #certificate {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 100%;
+        border: none;
+        box-shadow: none;
+        padding: 15px;
+    }
+    .no-print { display: none !important; }
+}
+</style>
+
+<div class="report-page">
+
+    <div class="report-heading">
+        <h1 data-i18n="reports_title">Reports & Verification Certificates</h1>
+        <p data-i18n="reports_subtitle">Official certified extract generation and digital verification certificates.</p>
+    </div>
+
+    <div class="card certificate" id="certificate">
+
+        <div class="certificate-header">
+            <h2 data-i18n="cert_title">OFFICIAL LAND RECORD VERIFICATION CERTIFICATE</h2>
+            <p data-i18n="cert_subtitle">Government Revenue Administration · Cadastral Authenticity Report</p>
+            <span class="demo-label {{ 'verified' if record and record.status == 'VERIFIED' else '' }}" data-i18n="{{ 'status_verified' if record and record.status == 'VERIFIED' else 'cert_extract_badge' }}">
+                {{ record.status if record else 'OFFICIAL VERIFICATION EXTRACT' }}
+            </span>
+        </div>
+
+        <table class="details-table">
+            <tr>
+                <td data-i18n="cert_ref">Record Reference</td>
+                <td><strong>{{ record.record_number if record else 'LV-2026-00125' }}</strong></td>
+            </tr>
+            <tr>
+                <td data-i18n="owner_name">Landowner Name</td>
+                <td><strong>{{ record.owner_name if record else 'Ramesh Kumar S.' }}</strong></td>
+            </tr>
+            <tr>
+                <td data-i18n="survey_number">Survey Number</td>
+                <td>{{ record.survey_number if record else '123/4A' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="patta_number">Patta Number</td>
+                <td>{{ record.patta_number if record else '45892' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="district">District</td>
+                <td>{{ record.district if record else 'Salem' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="taluk">Taluk</td>
+                <td>{{ record.taluk if record else 'Attur' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="village">Village</td>
+                <td>{{ record.village if record else 'Attur Rural' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="land_area">Land Area / Extent</td>
+                <td>{{ record.land_area if record else '2.5 Acres' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="doc_type">Document Type</td>
+                <td>{{ record.document_type if record else 'Patta Passbook' }}</td>
+            </tr>
+            <tr>
+                <td data-i18n="cit_quality_label">OCR Extraction Quality</td>
+                <td>{{ record.confidence_score if record else '91.0' }}%</td>
+            </tr>
+            <tr>
+                <td data-i18n="cert_seal_title">Cryptographic SHA-256 Seal</td>
+                <td style="font-family:monospace; font-size:12px; word-break:break-all;">
+                    {{ record.qr_hash if record and record.qr_hash else 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' }}
+                </td>
+            </tr>
+        </table>
+
+        <div class="disclaimer">
+            <strong data-i18n="cert_disclaimer_title">Legal Attestation:</strong>
+            <span data-i18n="cert_disclaimer_body">This certificate is generated by LandVault AI following automated OCR extraction and Revenue Officer verification. Verification status reflects comparison against authoritative Tamil Nadu Cadastral Gazetteers and Taluk registers.</span>
+        </div>
+
+    </div>
+
+    <div class="report-actions no-print">
+        <button
+            type="button"
+            class="download-button"
+            onclick="window.print()">
+            <span data-i18n="btn_print_pdf">Print / Save as PDF</span>
+        </button>
+        {% if session.get('role') == 'citizen' %}
+        <a href="{{ url_for('citizen_portal') }}" class="btn btn-secondary" style="padding:12px 20px;">
+            <span data-i18n="btn_back_home">Return to Citizen Portal</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('land_records') }}" class="btn btn-secondary" style="padding:12px 20px;">
+            <span data-i18n="btn_back_records">Back to Records</span>
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

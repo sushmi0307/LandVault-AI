@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Digital Land Record — LandVault AI</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}" media="print">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+  <script>
+    (function() {
+      var savedLang = localStorage.getItem('landvault_lang') || 'en';
+      document.documentElement.lang = savedLang;
+    })();
+  </script>
+</head>
+<body style="background-color: var(--color-bg); padding: 40px 16px;">
+
+<div class="qr-cert-card">
+  <!-- Top bar with language switcher -->
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;" class="no-print">
+    <div class="lang-switcher">
+      <button type="button" class="lang-btn active" data-lang="en">English</button>
+      <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+    </div>
+  </div>
+
+  <div class="qr-cert-header">
+    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="LandVault AI" style="height: 52px; margin-bottom: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--color-violet); letter-spacing: 0.5px;" data-i18n="verify_public_tag">
+      DEPARTMENT OF REVENUE & LAND ADMINISTRATION • GOVT VERIFIED
+    </div>
+    <h1 style="font-size: 24px; font-weight: 900; color: var(--color-primary); margin-top: 10px;" data-i18n="verify_public_title">
+      Verify Digital Land Record
+    </h1>
+    <p style="font-size: 13.5px; color: var(--color-text-muted); margin-top: 4px;" data-i18n="verify_public_sub">
+      Public cryptographic authenticity certificate
+    </p>
+  </div>
+
+  <!-- QR CODE CONTAINER -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <div class="qr-box-center">
+      <!-- High Resolution Vector QR -->
+      <svg width="150" height="150" viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#FFFFFF"/>
+        <!-- QR Corner Markers -->
+        <rect x="8" y="8" width="28" height="28" fill="#171A3A"/>
+        <rect x="12" y="12" width="20" height="20" fill="#FFFFFF"/>
+        <rect x="16" y="16" width="12" height="12" fill="#171A3A"/>
+
+        <rect x="64" y="8" width="28" height="28" fill="#171A3A"/>
+        <rect x="68" y="12" width="20" height="20" fill="#FFFFFF"/>
+        <rect x="72" y="16" width="12" height="12" fill="#171A3A"/>
+
+        <rect x="8" y="64" width="28" height="28" fill="#171A3A"/>
+        <rect x="12" y="68" width="20" height="20" fill="#FFFFFF"/>
+        <rect x="16" y="72" width="12" height="12" fill="#171A3A"/>
+
+        <!-- QR Data Matrix Pixels -->
+        <rect x="42" y="10" width="8" height="8" fill="#0F8B8D"/>
+        <rect x="52" y="18" width="6" height="6" fill="#171A3A"/>
+        <rect x="40" y="26" width="8" height="8" fill="#171A3A"/>
+        <rect x="10" y="42" width="8" height="8" fill="#0F8B8D"/>
+        <rect x="22" y="44" width="6" height="6" fill="#171A3A"/>
+        <rect x="36" y="40" width="14" height="14" fill="#F2A93B"/>
+        <rect x="54" y="42" width="8" height="8" fill="#171A3A"/>
+        <rect x="70" y="44" width="8" height="8" fill="#0F8B8D"/>
+        <rect x="82" y="42" width="8" height="8" fill="#171A3A"/>
+        <rect x="42" y="60" width="8" height="8" fill="#171A3A"/>
+        <rect x="54" y="62" width="8" height="8" fill="#0F8B8D"/>
+        <rect x="70" y="64" width="10" height="10" fill="#171A3A"/>
+        <rect x="42" y="78" width="8" height="8" fill="#F2A93B"/>
+        <rect x="54" y="76" width="8" height="8" fill="#171A3A"/>
+        <rect x="70" y="80" width="12" height="12" fill="#0F8B8D"/>
+      </svg>
+    </div>
+    <div style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;" data-i18n="verify_public_qr_caption">
+      Scan QR to verify this record on any smartphone or kiosk.
+    </div>
+  </div>
+
+  <!-- RECORD STATUS BADGE -->
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 4px;" data-i18n="verify_public_id_label">Record Identifier</div>
+    <div style="font-size: 20px; font-weight: 900; font-family: monospace; color: var(--color-primary);">
+      {{ record.record_number }}
+    </div>
+    <div style="margin-top: 8px;">
+      <span class="status-pill {{ record.status.lower() }}" style="font-size: 13px; padding: 6px 14px;">
+        ✓ {{ record.status.replace('_', ' ') }}
+      </span>
+    </div>
+  </div>
+
+  <!-- LIMITED PUBLIC RECORD SPECIFICATION -->
+  <div style="background-color: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 13.5px;">
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_pattadhar">Registered Pattadhar</span>
+        <strong>{{ record.owner_name }}</strong>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_cadastral">Cadastral Survey Number</span>
+        <strong style="font-family: monospace;">{{ record.survey_number }}</strong>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="patta_number">Patta Number</span>
+        <strong style="font-family: monospace;">{{ record.patta_number }}</strong>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_extent">Registered Extent / Area</span>
+        <strong style="color: var(--color-teal);">{{ record.land_area }}</strong>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_jurisdiction">District Jurisdiction</span>
+        <strong>{{ record.district }}</strong>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_taluk_village">Taluk / Village</span>
+        <strong>{{ record.taluk }} ({{ record.village }})</strong>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_officer">Verified By Officer</span>
+        <span>{{ record.verified_by or 'Revenue Divisional Officer' }}</span>
+      </div>
+      <div>
+        <span style="color: var(--color-text-muted); display: block; font-size: 12px;" data-i18n="verify_public_date">Verification Date</span>
+        <span>{{ record.verified_at or '04 October 2026' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRYPTOGRAPHIC HASH ANCHOR -->
+  <div style="border-top: 1px dashed var(--color-border); padding-top: 16px; margin-bottom: 24px;">
+    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);" data-i18n="verify_public_tamper_seal">
+      Tamper-Evident SHA-256 Digital Certificate Seal
+    </div>
+    <code style="font-size: 10.5px; color: var(--color-violet); word-break: break-all; display: block; margin-top: 4px; background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--color-border);">
+      {{ record.qr_hash }}
+    </code>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div style="display: flex; justify-content: center; gap: 12px;" class="no-print">
+    <button type="button" class="btn btn-teal" onclick="window.print()">
+      <span data-i18n="verify_public_print_btn">Print Verification Stamp</span>
+    </button>
+    <a href="{{ url_for('citizen_portal') }}" class="btn btn-secondary">
+      <span data-i18n="verify_public_return_btn">Return to Citizen Portal</span>
+    </a>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

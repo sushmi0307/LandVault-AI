@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#171A3A"/>
+      <stop offset="100%" stop-color="#2D2852"/>
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F8B8D"/>
+      <stop offset="100%" stop-color="#18B0B3"/>
+    </linearGradient>
+    <linearGradient id="saffronGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2A93B"/>
+      <stop offset="100%" stop-color="#FFAE42"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- ICON GROUP -->
+  <g transform="translate(10, 10)">
+    <!-- Outer Shield Shape (Security) -->
+    <path d="M50 4 C76 4, 94 14, 94 36 C94 68, 64 88, 50 96 C36 88, 6 68, 6 36 C6 14, 24 4, 50 4 Z" 
+          fill="url(#shieldGrad)" stroke="#4B3F72" stroke-width="2.5" />
+
+    <!-- Document Page Fold in Top Right of Shield (Document) -->
+    <path d="M30 22 L65 22 L76 33 L76 72 L30 72 Z" 
+          fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="3,3" opacity="0.6"/>
+    <path d="M65 22 L65 33 L76 33 Z" fill="url(#tealGrad)" />
+
+    <!-- Land Parcel Quadrants (Land Parcel Grid) -->
+    <!-- Parcel 1: Top-Left -->
+    <rect x="24" y="32" width="22" height="18" rx="2" fill="url(#tealGrad)" opacity="0.85" />
+    <!-- Parcel 2: Top-Right -->
+    <rect x="50" y="32" width="24" height="16" rx="2" fill="#4B3F72" stroke="#0F8B8D" stroke-width="1.2" />
+    <!-- Parcel 3: Bottom-Left -->
+    <rect x="24" y="54" width="20" height="22" rx="2" fill="#20243A" stroke="#F2A93B" stroke-width="1.2" />
+    <!-- Parcel 4: Bottom-Right (Active AI Parcel) -->
+    <rect x="48" y="52" width="26" height="24" rx="2" fill="url(#saffronGrad)" />
+
+    <!-- AI Circuit Traces & Nodes (Digital Intelligence) -->
+    <!-- Horizontal & Vertical Circuit Lines -->
+    <line x1="16" y1="41" x2="24" y2="41" stroke="#0F8B8D" stroke-width="1.8" />
+    <circle cx="16" cy="41" r="2.5" fill="#0F8B8D" />
+
+    <line x1="74" y1="64" x2="84" y2="64" stroke="#F2A93B" stroke-width="1.8" />
+    <circle cx="84" cy="64" r="2.5" fill="#F2A93B" />
+
+    <line x1="50" y1="76" x2="50" y2="86" stroke="#0F8B8D" stroke-width="1.8" />
+    <circle cx="50" cy="86" r="2.5" fill="#0F8B8D" />
+
+    <!-- Micro AI Node in Center Grid Junction -->
+    <circle cx="47" cy="51" r="3" fill="#FFFFFF" stroke="#0F8B8D" stroke-width="1.5" />
+  </g>
+
+  <!-- LOGO TYPOGRAPHY -->
+  <g transform="translate(125, 20)">
+    <!-- Brand Title -->
+    <text x="0" y="44" font-family="'Inter', 'Plus Jakarta Sans', system-ui, sans-serif" 
+          font-size="34" font-weight="900" letter-spacing="1.5" fill="#171A3A">
+      LANDVAULT
+    </text>
+    
+    <!-- AI Tag Badge -->
+    <rect x="238" y="16" width="48" height="32" rx="6" fill="url(#tealGrad)" />
+    <text x="262" y="38" font-family="'Inter', system-ui, sans-serif" 
+          font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">
+      AI
+    </text>
+
+    <!-- Subtitle / Brand Concept -->
+    <text x="2" y="70" font-family="'Inter', 'Plus Jakarta Sans', system-ui, sans-serif" 
+          font-size="13" font-weight="600" letter-spacing="0.5" fill="#4B3F72" opacity="0.9">
+      Intelligent Land Record Verification
+    </text>
+
+    <!-- Mini Heritage Dot Accents -->
+    <circle cx="270" cy="67" r="2.5" fill="#F2A93B" />
+    <text x="280" y="70" font-family="'Inter', system-ui, sans-serif" 
+          font-size="11" font-weight="600" letter-spacing="0.8" fill="#0F8B8D">
+      
+    </text>
+  </g>
+</svg>
+

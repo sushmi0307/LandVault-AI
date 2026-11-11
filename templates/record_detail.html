@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}Land Record Details - LandVault AI{% endblock %}
+
+{% block content %}
+
+<style>
+.record-detail-page {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.record-header {
+    margin-bottom: 24px;
+}
+
+.record-header h1 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.record-header p {
+    color: var(--color-text-muted);
+}
+
+.record-card {
+    background: white;
+    border: 1px solid #e1e5ec;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.record-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.record-table th,
+.record-table td {
+    padding: 14px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.record-table th {
+    width: 35%;
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.record-status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 13px;
+}
+
+.record-note {
+    padding: 15px;
+    background: #f0f9f8;
+    border-left: 4px solid #168b87;
+    border-radius: 5px;
+    line-height: 1.7;
+    margin-top: 20px;
+}
+
+.record-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.record-button {
+    display: inline-block;
+    padding: 11px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    background: #168b87;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.record-button.secondary {
+    background: #64748b;
+}
+
+@media (max-width: 600px) {
+    .record-card {
+        padding: 15px;
+    }
+
+    .record-table th,
+    .record-table td {
+        padding: 10px;
+        display: block;
+        width: auto;
+    }
+
+    .record-table th {
+        border-bottom: none;
+        padding-bottom: 4px;
+    }
+
+    .record-table td {
+        padding-top: 4px;
+    }
+}
+
+@media print {
+    .record-actions {
+        display: none;
+    }
+}
+</style>
+
+<div class="record-detail-page">
+
+    <div class="record-header">
+        <h1 data-i18n="detail_title">Land Record Details</h1>
+        <p data-i18n="detail_subtitle">Review the information extracted from the uploaded land document.</p>
+    </div>
+
+    <div class="record-card">
+
+        <h2 data-i18n="doc_info_header">Document Information</h2>
+
+        <table class="record-table">
+            <tbody>
+                <tr>
+                    <th data-i18n="th_record_id">Record ID</th>
+                    <td>
+                        {% if record is defined and record %}
+                            <strong style="font-family:monospace; color:var(--color-teal);">{{ record.record_number|default(record.id|default('Not available', true), true) }}</strong>
+                        {% else %}
+                            <span data-i18n="val_not_available">Not available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="doc_type">Document Type</th>
+                    <td>
+                        {% if record is defined and record %}
+                            {{ record.document_type|default('Not found in document', true) }}
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="owner_name">Owner Name</th>
+                    <td>
+                        {% if record is defined and record %}
+                            <strong>{{ record.owner_name|default('Not found in document', true) }}</strong>
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="survey_number">Survey Number</th>
+                    <td>
+                        {% if record is defined and record %}
+                            <span style="font-family:monospace;">{{ record.survey_number|default('Not found in document', true) }}</span>
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="subdivision_number">Subdivision Number</th>
+                    <td>
+                        {% if record is defined and record and record.subdivision_number %}
+                            <span style="font-family:monospace;">{{ record.subdivision_number }}</span>
+                        {% else %}
+                            <span data-i18n="val_not_specified">Not specified</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="patta_number">Patta Number</th>
+                    <td>
+                        {% if record is defined and record %}
+                            {{ record.patta_number|default('Not found in document', true) }}
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="district">District</th>
+                    <td>
+                        {% if record is defined and record %}
+                            {{ record.district|default('Not found in document', true) }}
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="taluk">Taluk</th>
+                    <td>
+                        {% if record is defined and record %}
+                            {{ record.taluk|default('Not found in document', true) }}
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="village">Village</th>
+                    <td>
+                        {% if record is defined and record %}
+                            {{ record.village|default('Not found in document', true) }}
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="land_area">Land Area</th>
+                    <td>
+                        {% if record is defined and record %}
+                            {{ record.land_area|default('Not found in document', true) }}
+                        {% else %}
+                            <span data-i18n="val_not_found">Not found in document</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="ocr_confidence">OCR Confidence</th>
+                    <td>
+                        {% if record is defined and record and record.confidence_score is defined and record.confidence_score is not none %}
+                            <strong>{{ record.confidence_score }}%</strong>
+                        {% elif record is defined and record and record.confidence is defined and record.confidence is not none %}
+                            <strong>{{ record.confidence }}%</strong>
+                        {% else %}
+                            <span data-i18n="val_not_available">Not available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th data-i18n="processing_status">Processing Status</th>
+                    <td>
+                        <span class="record-status status-pill {{ 'verified' if record and record.status == 'VERIFIED' else 'pending' }}">
+                            {% if record is defined and record %}
+                                {{ record.status|default('Pending Review', true) }}
+                            {% else %}
+                                <span data-i18n="val_not_available">Record unavailable</span>
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- OWNERSHIP HISTORY & TITLE CHAIN -->
+        <div style="margin-top:28px; padding-top:20px; border-top:1px solid #e5e7eb;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <div>
+                    <h2 style="margin:0 0 4px 0; font-size:17px;" data-i18n="ownership_history_title">Ownership History & Chain of Title</h2>
+                    <p style="font-size:12px; color:var(--color-text-muted); margin:0;" data-i18n="ownership_history_desc">
+                        Chronological chain of title transfers and revenue registrations recorded in LandVault AI
+                    </p>
+                </div>
+                {% if ownership_history %}
+                <span class="status-pill verified" style="font-size:11px; font-weight:700;">
+                    {{ ownership_history|length }} Registered Records
+                </span>
+                {% endif %}
+            </div>
+
+            {% if ownership_history and ownership_history|length > 0 %}
+            <div style="overflow-x:auto;">
+                <table class="record-table">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="width:20%;" data-i18n="th_owner">Owner Name</th>
+                            <th style="width:16%;" data-i18n="th_transfer_type">Transfer Type</th>
+                            <th style="width:14%;" data-i18n="th_transfer_date">Transfer Date</th>
+                            <th style="width:20%;" data-i18n="th_doc_ref">Deed / Doc Reference</th>
+                            <th style="width:15%;" data-i18n="th_verified_by">Verified By</th>
+                            <th style="width:15%;" data-i18n="th_ownership_status">Ownership Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in ownership_history %}
+                        <tr>
+                            <td>
+                                <strong>{{ h.owner_name }}</strong>
+                                <div style="font-size:11px; color:var(--color-text-muted);">{{ h.ownership_type|default('Individual') }}</div>
+                            </td>
+                            <td>{{ h.transfer_type }}</td>
+                            <td><span style="font-family:monospace; font-size:12.5px;">{{ h.transfer_date }}</span></td>
+                            <td>
+                                <span style="font-family:monospace; font-size:11.5px; color:var(--color-teal);">{{ h.document_ref|default('Verified Registry Entry') }}</span>
+                                {% if h.notes %}
+                                <div style="font-size:11px; color:var(--color-text-muted); margin-top:2px;">{{ h.notes }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="font-size:12px; font-weight:600;">{{ h.verified_by|default('Revenue Registry') }}</div>
+                                <div style="font-size:11px; color:var(--color-text-muted);">{{ h.verified_at[:10] if h.verified_at else '' }}</div>
+                            </td>
+                            <td>
+                                {% if h.is_current %}
+                                <span class="status-pill verified" style="font-size:11px; padding:3px 8px; font-weight:700;">
+                                    Current Owner
+                                </span>
+                                {% else %}
+                                <span class="status-pill" style="font-size:11px; padding:3px 8px; background:#f1f5f9; color:#475569; font-weight:600;">
+                                    Previous Owner
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="padding:16px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; font-size:12.5px; color:var(--color-text-muted); line-height:1.6;">
+                <strong style="color:var(--color-primary);">Current Registered Owner:</strong> {{ record.owner_name|default('Not specified') }}
+                <br>
+                <span>No prior historical title transfers are currently registered in the official database for Survey #{{ record.survey_number|default('N/A') }}. Future verified mutations and deed transfers will automatically append to this chain of custody.</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="record-note">
+            <strong data-i18n="detail_note_title">Important:</strong>
+            <span data-i18n="detail_note_body">These details depend on the uploaded document and OCR results. Missing information is not guessed. OCR confidence measures text extraction quality and does not prove ownership or document authenticity. This page is not an official government certificate.</span>
+        </div>
+
+        <div class="record-actions">
+            <button class="record-button" onclick="window.print()">
+                <span data-i18n="btn_print_pdf">Print / Save as PDF</span>
+            </button>
+
+            {% if session.get('role') == 'citizen' %}
+            <a class="record-button secondary" href="{{ url_for('citizen_portal') }}">
+                <span data-i18n="btn_back_home">Return to Citizen Portal</span>
+            </a>
+            {% else %}
+            <a class="record-button secondary" href="{{ url_for('land_records') }}">
+                <span data-i18n="btn_back_records">Back to Records</span>
+            </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

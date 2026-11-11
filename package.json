@@ -1,0 +1,31 @@
+{
+  "name": "landvault-ai",
+  "version": "1.0.0",
+  "description": "LandVault AI — Intelligent Land Record Digitization and Validation System",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "python app.py",
+    "test": "python test_app.py",
+    "test:all": "python test_app.py && python test_extended.py",
+    "test:extended": "python test_extended.py"
+  },
+  "keywords": [
+    "land-records",
+    "patta",
+    "chitta",
+    "ocr",
+    "tesseract",
+    "cadastre",
+    "revenue"
+  ],
+  "author": "LandVault AI Team",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "multer": "^2.4.0",
+    "pdf-parse": "^2.4.5",
+    "sqlite3": "^6.0.1"
+  }
+}

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="72" height="72" fill="none">
+  <!-- Outer Geometric Cadastral Parcel Frame -->
+  <polygon points="10,22 36,8 62,18 56,58 16,62" fill="#D1FAE5" fill-opacity="0.5" stroke="#14532D" stroke-width="2.5" stroke-dasharray="3.5 2"/>
+  
+  <!-- Boundary Survey Pegs with Gold Accent -->
+  <circle cx="10" cy="22" r="3.5" fill="#F5B942" stroke="#14532D" stroke-width="1.5"/>
+  <circle cx="36" cy="8" r="3.5" fill="#F5B942" stroke="#14532D" stroke-width="1.5"/>
+  <circle cx="62" cy="18" r="3.5" fill="#F5B942" stroke="#14532D" stroke-width="1.5"/>
+  <circle cx="56" cy="58" r="3.5" fill="#F5B942" stroke="#14532D" stroke-width="1.5"/>
+  <circle cx="16" cy="62" r="3.5" fill="#F5B942" stroke="#14532D" stroke-width="1.5"/>
+
+  <!-- Stylised Land Plot Base Polygon -->
+  <path d="M18 46L36 34L50 42L44 56L22 58Z" fill="#059669" fill-opacity="0.25"/>
+
+  <!-- Crisp Central White Document Page -->
+  <g filter="drop-shadow(0 4px 6px rgba(20, 83, 45, 0.18))">
+    <path d="M22 18H44L52 26V52C52 54.2 50.2 56 48 56H22C19.8 56 18 54.2 18 52V22C18 19.8 19.8 18 22 18Z" fill="#FFFFFF" stroke="#14532D" stroke-width="2.2"/>
+    <!-- Folded Corner with Soft Mint Fill & Gold Accent Line -->
+    <path d="M44 18V26H52" fill="#D1FAE5" stroke="#14532D" stroke-width="2.2" stroke-linejoin="round"/>
+    <line x1="44" y1="26" x2="52" y2="26" stroke="#F5B942" stroke-width="2"/>
+
+    <!-- Document Data Rows -->
+    <line x1="24" y1="30" x2="38" y2="30" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="24" y1="36" x2="46" y2="36" stroke="#102A22" stroke-width="2" stroke-linecap="round"/>
+    <line x1="24" y1="42" x2="42" y2="42" stroke="#102A22" stroke-width="2" stroke-linecap="round"/>
+    <line x1="24" y1="48" x2="34" y2="48" stroke="#059669" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Digital Verification Seal with Checkmark -->
+  <g transform="translate(42, 40)">
+    <circle cx="12" cy="12" r="11" fill="#059669" stroke="#FFFFFF" stroke-width="2.5"/>
+    <circle cx="12" cy="12" r="13" stroke="#F5B942" stroke-width="1.5" stroke-dasharray="2 2"/>
+    <path d="M7 12L10.5 15.5L17 8.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - LandVault AI{% endblock %}
+
+{% block content %}
+
+<style>
+.analytics-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.analytics-header {
+    margin-bottom: 24px;
+}
+
+.analytics-header h1 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.analytics-header p {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.analytics-card {
+    background: white;
+    border: 1px solid #e1e5ec;
+    border-radius: 10px;
+    padding: 22px;
+}
+
+.analytics-card h3 {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 14px;
+}
+
+.analytics-value {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-primary);
+    overflow-wrap: anywhere;
+}
+
+.analytics-description {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.analytics-section {
+    background: white;
+    border: 1px solid #e1e5ec;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 450px;
+}
+
+.analytics-table th,
+.analytics-table td {
+    padding: 13px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.analytics-table th {
+    background: #f5f7fa;
+}
+
+.analytics-note {
+    padding: 15px;
+    background: #f0f9f8;
+    border-left: 4px solid #168b87;
+    border-radius: 5px;
+    line-height: 1.7;
+}
+
+@media print {
+    .analytics-section,
+    .analytics-card {
+        break-inside: avoid;
+    }
+}
+</style>
+
+<div class="analytics-page">
+
+    <div class="analytics-header">
+        <h1>Analytics</h1>
+        <p>Review document processing statistics and record status.</p>
+    </div>
+
+    <div class="analytics-grid">
+
+        <div class="analytics-card">
+            <h3>Total Records</h3>
+            <div class="analytics-value">
+                {{ total_records|default(0) }}
+            </div>
+            <div class="analytics-description">
+                Total records reported by the application.
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Processed Records</h3>
+            <div class="analytics-value">
+                {{ processed_records|default(0) }}
+            </div>
+            <div class="analytics-description">
+                Records reported as processed.
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Pending Review</h3>
+            <div class="analytics-value">
+                {{ pending_records|default(0) }}
+            </div>
+            <div class="analytics-description">
+                Records awaiting further review.
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Flagged Records</h3>
+            <div class="analytics-value">
+                {{ flagged_records|default(0) }}
+            </div>
+            <div class="analytics-description">
+                Records requiring additional attention.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="analytics-section">
+
+        <h2>Document Processing Overview</h2>
+
+        <table class="analytics-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Total Records</td>
+                    <td>{{ total_records|default(0) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Processed Records</td>
+                    <td>{{ processed_records|default(0) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Pending Review</td>
+                    <td>{{ pending_records|default(0) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Flagged Records</td>
+                    <td>{{ flagged_records|default(0) }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="analytics-section">
+
+        <h2>Interpretation</h2>
+
+        <div class="analytics-note">
+            Statistics depend on the data supplied by the application backend.
+            A processed document is not necessarily an authentic document.
+            OCR confidence measures text extraction quality and should not be
+            treated as proof of ownership or legal verification.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

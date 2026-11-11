@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Log - LandVault AI{% endblock %}
+
+{% block content %}
+
+<style>
+.audit-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.audit-header {
+    margin-bottom: 24px;
+}
+
+.audit-header h1 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.audit-header p {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.audit-card {
+    background: white;
+    border: 1px solid #e1e5ec;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+.audit-table th,
+.audit-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    overflow-wrap: anywhere;
+}
+
+.audit-table th {
+    background: #f5f7fa;
+    font-weight: 600;
+}
+
+.audit-table tr:hover {
+    background: #f9fafb;
+}
+
+.audit-note {
+    padding: 15px;
+    background: #f0f9f8;
+    border-left: 4px solid #168b87;
+    border-radius: 5px;
+    line-height: 1.7;
+}
+
+.audit-empty {
+    text-align: center;
+    padding: 28px;
+    color: #6b7280;
+}
+</style>
+
+<div class="audit-page">
+
+    <div class="audit-header">
+        <h1>System Audit Trail</h1>
+        <p>Review available application activity, officer decisions, and document processing events.</p>
+    </div>
+
+    <div class="audit-card">
+
+        <h2>Activity Records</h2>
+
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>User</th>
+                    <th>Record ID</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% set entries = logs if logs is defined and logs else (audit_logs if audit_logs is defined and audit_logs else []) %}
+                {% if entries %}
+                    {% for log in entries %}
+                    <tr>
+                        <td>
+                            {{ log.timestamp|default('Not available', true) }}
+                        </td>
+
+                        <td>
+                            {{ log.action|default('Not available', true) }}
+                        </td>
+
+                        <td>
+                            {{ log.username|default('Not available', true) }}
+                        </td>
+
+                        <td>
+                            {{ log.record_id|default('—', true) }}
+                        </td>
+
+                        <td>
+                            {{ log.details|default('No details available', true) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="audit-empty">
+                            No audit activity is available to display.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="audit-card">
+
+        <h2>Important Information</h2>
+
+        <div class="audit-note">
+            This page displays audit information only when the application
+            backend supplies it. An empty table does not mean that no activity
+            occurred. Audit history should be recorded and protected by the
+            backend to provide a reliable activity trail.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

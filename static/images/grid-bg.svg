@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" fill="none">
+  <!-- Subtle parcel boundaries -->
+  <path d="M0 80 H320 M0 160 H320 M0 240 H320" stroke="#4B3F72" stroke-opacity="0.04" stroke-width="1.2"/>
+  <path d="M80 0 V320 M160 0 V320 M240 0 V320" stroke="#4B3F72" stroke-opacity="0.04" stroke-width="1.2"/>
+  
+  <!-- Angled parcel boundary sub-divisions -->
+  <path d="M80 80 L160 160 M240 80 L320 160 M0 240 L80 320" stroke="#0F8B8D" stroke-opacity="0.06" stroke-width="1" stroke-dasharray="4,4"/>
+  <path d="M160 0 L240 80 M80 160 L160 240" stroke="#F2A93B" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="3,3"/>
+  
+  <!-- Digital Nodes at key intersections -->
+  <circle cx="80" cy="80" r="2" fill="#0F8B8D" fill-opacity="0.12"/>
+  <circle cx="160" cy="160" r="2.5" fill="#4B3F72" fill-opacity="0.1"/>
+  <circle cx="240" cy="80" r="2" fill="#F2A93B" fill-opacity="0.15"/>
+  <circle cx="80" cy="240" r="2" fill="#F2A93B" fill-opacity="0.15"/>
+  <circle cx="240" cy="240" r="2" fill="#0F8B8D" fill-opacity="0.12"/>
+  
+  <!-- Cadastral coordinate markings -->
+  <text x="84" y="76" font-family="monospace" font-size="7" fill="#4B3F72" fill-opacity="0.12">11°N</text>
+  <text x="164" y="156" font-family="monospace" font-size="7" fill="#0F8B8D" fill-opacity="0.15">78°E</text>
+  <text x="244" y="236" font-family="monospace" font-size="7" fill="#F2A93B" fill-opacity="0.18">LV-G</text>
+</svg>

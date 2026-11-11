@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - LandVault AI{% endblock %}
+
+{% block content %}
+
+<style>
+.settings-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.settings-header {
+    margin-bottom: 24px;
+}
+
+.settings-header h1 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.settings-header p {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.settings-card {
+    background: white;
+    border: 1px solid #e1e5ec;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.settings-card h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+}
+
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-description {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 6px;
+}
+
+.settings-value {
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.settings-notice {
+    background: #f0f9f8;
+    border-left: 4px solid #168b87;
+    border-radius: 5px;
+    padding: 15px;
+    line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+    .settings-card {
+        padding: 16px;
+    }
+
+    .settings-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .settings-value {
+        text-align: left;
+    }
+}
+</style>
+
+<div class="settings-page">
+
+    <div class="settings-header">
+        <h1>Settings</h1>
+        <p>View application information and document processing guidelines.</p>
+    </div>
+
+    <div class="settings-card">
+
+        <h2>Application Information</h2>
+
+        <div class="settings-row">
+            <div>
+                <strong>Application Name</strong>
+                <div class="settings-description">
+                    Name of the document management application.
+                </div>
+            </div>
+            <div class="settings-value">LandVault AI</div>
+        </div>
+
+        <div class="settings-row">
+            <div>
+                <strong>Document Processing</strong>
+                <div class="settings-description">
+                    Text extraction from uploaded land documents.
+                </div>
+            </div>
+            <div class="settings-value">OCR</div>
+        </div>
+
+        <div class="settings-row">
+            <div>
+                <strong>Supported Documents</strong>
+                <div class="settings-description">
+                    Accepted land document categories.
+                </div>
+            </div>
+            <div class="settings-value">
+                Patta, Chitta, Sale Deed, Settlement Deed, Adangal
+            </div>
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <h2>Document Processing Guidelines</h2>
+
+        <div class="settings-row">
+            <div>
+                <strong>Missing Information</strong>
+                <div class="settings-description">
+                    Do not guess or invent details that are absent from a document.
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div>
+                <strong>OCR Confidence</strong>
+                <div class="settings-description">
+                    Confidence indicates text extraction quality, not document authenticity.
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div>
+                <strong>Document Verification</strong>
+                <div class="settings-description">
+                    Extracted information must be checked against appropriate authoritative records.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <h2>Important Notice</h2>
+
+        <div class="settings-notice">
+            This application assists with land document text extraction and review.
+            It does not independently establish legal ownership or replace official
+            government verification.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

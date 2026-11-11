@@ -1,0 +1,731 @@
+{% extends "base.html" %}
+
+{% block title %}Citizen Land Portal — LandVault AI{% endblock %}
+
+{% block content %}
+<style>
+.citizen-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.citizen-hero {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-secondary);
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.citizen-hero h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: #FFFFFF;
+}
+.citizen-hero p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+  max-width: 720px;
+  line-height: 1.6;
+}
+.cit-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+@media (max-width: 900px) {
+  .cit-grid-2 { grid-template-columns: 1fr; }
+}
+.cit-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  margin-bottom: 8px;
+}
+.cit-field-row label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  width: 140px;
+}
+.cit-field-row input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 13px;
+  padding: 4px;
+}
+.cit-field-row input:focus {
+  outline: none;
+  background: #FFFFFF;
+  border-radius: 4px;
+}
+</style>
+
+<div class="citizen-page">
+
+  <!-- CITIZEN PORTAL HERO -->
+  <div class="citizen-hero">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="font-size:12px; font-weight:700; color:var(--color-saffron); text-transform:uppercase; margin-bottom:4px;" data-i18n="cit_hero_tag">
+          Government Revenue Digital Services · தமிழ்நாடு நில ஆவணங்கள்
+        </div>
+        <h1 data-i18n="cit_hero_title">Citizen Land Portal — Land Record Services</h1>
+        <p data-i18n="cit_hero_desc">
+          Upload your Patta, Chitta, or other land documents directly from your computer. Our local AI OCR extracts information without any external API keys. Review and correct extracted fields before submitting for official Revenue Officer review.
+        </p>
+      </div>
+      <div style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:12px 18px; text-align:right;">
+        <div style="font-size:11px; opacity:0.8;" data-i18n="cit_logged_in_label">LOGGED IN CITIZEN</div>
+        <div style="font-size:15px; font-weight:700; color:#FFFFFF;">{{ session.get('full_name', 'Ananya R. Sharma') }}</div>
+        <div style="font-size:11px; color:var(--color-saffron);"><span data-i18n="cit_district_label">District:</span> {{ session.get('district', 'Salem') }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK SEARCH CARD -->
+  <div class="card" style="padding: 20px; margin-bottom: 24px;" id="search-sec">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+      <div>
+        <h3 class="card-title" style="margin:0;" data-i18n="cit_search_title">Quick Patta & Land Record Verification</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin:2px 0 0 0;" data-i18n="cit_search_desc">Check official revenue status by Patta number</p>
+      </div>
+    </div>
+    
+    <div style="display:flex; gap:10px; max-width:600px;">
+      <input type="text" id="pattaSearchInput" data-i18n-placeholder="cit_search_placeholder" placeholder="Enter Patta Number (e.g. 45892 or 63941)" class="form-control" style="flex:1; padding:10px 14px; border:1px solid var(--color-border); border-radius:6px; font-size:13.5px;">
+      <button type="button" class="btn btn-primary" id="btnSearchPatta">
+        <svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;margin-right:6px;"><circle cx="11" cy="11" r="8" stroke="currentColor"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor"/></svg>
+        <span data-i18n="cit_search_btn">Lookup Patta</span>
+      </button>
+    </div>
+    <div id="pattaSearchResult" style="margin-top:14px; display:none;"></div>
+  </div>
+
+  <!-- DOCUMENT UPLOAD & LOCAL OCR PANEL -->
+  <div class="card" style="padding: 24px; margin-bottom: 24px;">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title" data-i18n="cit_upload_title">Upload & Digitize Land Document (Local AI OCR)</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;" data-i18n="cit_upload_desc">
+          Select a Patta or Chitta file from your computer (PDF, PNG, JPG). Local OCR will read the document offline without any API keys.
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick Sample Preset Cards for 1-Click Testing -->
+    <div style="margin-bottom: 18px;">
+      <div style="font-size:12px; font-weight:700; color:var(--color-primary); margin-bottom:8px;" data-i18n="cit_presets_title">⚡ Quick Test Presets (Instant 1-Click Verification):</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-secondary btn-sm cit-sample-btn" data-filename="sample_patta_passbook_salem.png" data-name="Patta Passbook (Salem)" data-i18n="cit_preset_passbook">
+          📄 Patta Passbook (Image)
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm cit-sample-btn" data-filename="sample_chitta_coimbatore.pdf" data-name="Chitta Extract (Text PDF)" data-i18n="cit_preset_chitta">
+          📑 Chitta Extract (Digital PDF)
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm cit-sample-btn" data-filename="sample_scanned_patta_salem.pdf" data-name="Scanned Patta (Scanned PDF)" data-i18n="cit_preset_scanned">
+          🖨 Scanned Patta (Scanned PDF)
+        </button>
+      </div>
+    </div>
+
+    <!-- Drag & Drop Dropzone -->
+    <div class="dropzone" id="citDropzone" onclick="document.getElementById('citFileInput').click()">
+      <input type="file" id="citFileInput" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff" style="display: none;">
+      <div class="dropzone-icon">
+        <svg viewBox="0 0 24 24" fill="none" style="width:32px;height:32px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"/><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="dropzone-title" data-i18n="cit_dropzone_title">Drag & Drop Your Land Record or Click to Browse</div>
+      <div class="dropzone-subtitle" data-i18n="cit_dropzone_sub">Supported formats: PDF (text or scanned), PNG, JPG, JPEG (Max 15MB)</div>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); document.getElementById('citFileInput').click()">
+        <span data-i18n="cit_browse_btn">Browse Files from Computer</span>
+      </button>
+    </div>
+
+    <!-- Selected File Details Card -->
+    <div id="citSelectedCard" style="display:none; background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:8px; padding:16px; margin-top:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h4 id="citFileName" style="margin:0; font-size:14px; font-weight:700; color:var(--color-primary);">filename.pdf</h4>
+          <p id="citFileInfo" style="margin:4px 0 0 0; font-size:12px; color:var(--color-text-muted);">PDF · 1.2 MB</p>
+        </div>
+        <div>
+          <button type="button" class="btn btn-primary" id="btnCitizenProcess">
+            <span data-i18n="cit_extract_btn">Extract Document Text (Local OCR)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress indicator -->
+    <div id="citProgressCard" style="display:none; margin-top:16px; padding:16px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:20px; height:20px; border:2px solid var(--color-teal); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
+        <div style="font-size:13px; font-weight:600; color:var(--color-primary);" id="citProgressText" data-i18n="cit_progress_text">
+          Running local Tesseract OCR & extracting land record attributes...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTRACTION RESULTS & REVIEW ON THE SAME PAGE -->
+  <div id="citResultsSection" style="display:none;">
+    <div class="cit-grid-2">
+      <!-- LEFT: DOCUMENT PREVIEW -->
+      <div class="card" style="padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 class="card-title" style="margin:0;" data-i18n="cit_preview_title">Uploaded Document Preview</h3>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnCitZoomIn">+</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnCitZoomOut">-</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnCitZoomReset" data-i18n="cit_btn_reset">Reset</button>
+          </div>
+        </div>
+        <div style="width:100%; height:550px; overflow:auto; border:1px solid var(--color-border); border-radius:6px; background:#EFEFEF; display:flex; align-items:center; justify-content:center;">
+          <img id="citPreviewImg" src="" alt="Document Preview" style="max-width:100%; height:auto; transition:transform 0.2s ease;">
+        </div>
+      </div>
+
+      <!-- RIGHT: EXTRACTED FIELDS & EDITING FOR SUBMISSION -->
+      <div class="card" style="padding: 24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h3 class="card-title" style="margin:0;" data-i18n="cit_review_title">Review Extracted Information</h3>
+            <p style="font-size:12px; color:var(--color-text-muted); margin:2px 0 0 0;" data-i18n="cit_review_desc">
+              Verify and correct details before submitting to Revenue Officer
+            </p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px; font-weight:700; color:var(--color-text-muted);" data-i18n="cit_quality_label">EXTRACTION QUALITY</div>
+            <div id="citConfBadge" style="font-size:18px; font-weight:800; color:var(--color-emerald);">88%</div>
+          </div>
+        </div>
+
+        <!-- Validation warning banner if any -->
+        <div id="citWarningBox" style="display:none; padding:12px; background:var(--color-danger-light); border:1px solid rgba(217,92,92,0.3); border-radius:6px; margin-bottom:16px; font-size:12.5px; color:var(--color-danger);">
+        </div>
+
+        <!-- Editable fields -->
+        <div style="margin-bottom:18px;">
+          <div class="cit-field-row">
+            <label data-i18n="owner_name">Landowner Name</label>
+            <input type="text" id="c_owner_name" data-i18n-placeholder="ph_owner_name" placeholder="Full Owner Name">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="survey_number">Survey Number</label>
+            <input type="text" id="c_survey_number" data-i18n-placeholder="ph_survey_number" placeholder="Survey Number (e.g. 184/2A)">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="subdivision_number">Subdivision Number</label>
+            <input type="text" id="c_subdivision_number" data-i18n-placeholder="ph_subdivision_number" placeholder="Subdivision (e.g. 2A)">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="patta_number">Patta Number</label>
+            <input type="text" id="c_patta_number" data-i18n-placeholder="ph_patta_number" placeholder="Patta Number">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="district">District</label>
+            <input type="text" id="c_district" data-i18n-placeholder="ph_district" placeholder="District">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="taluk">Taluk</label>
+            <input type="text" id="c_taluk" data-i18n-placeholder="ph_taluk" placeholder="Taluk">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="village">Village</label>
+            <input type="text" id="c_village" data-i18n-placeholder="ph_village" placeholder="Village">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="land_area">Land Area</label>
+            <input type="text" id="c_land_area" data-i18n-placeholder="ph_land_area" placeholder="Area (e.g. 2.5 Acres)">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="doc_type">Document Type</label>
+            <input type="text" id="c_document_type" data-i18n-placeholder="ph_doc_type" placeholder="Patta Passbook / Chitta">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="doc_date">Document Date</label>
+            <input type="text" id="c_document_date" data-i18n-placeholder="ph_doc_date" placeholder="DD-MM-YYYY">
+          </div>
+          <div class="cit-field-row">
+            <label data-i18n="cit_remarks_label">Citizen Remarks</label>
+            <input type="text" id="c_remarks" data-i18n-placeholder="ph_remarks" placeholder="Purpose (e.g. Verification / Ownership Update)">
+          </div>
+        </div>
+
+        <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:6px; padding:12px; margin-bottom:16px; font-size:12px; color:#166534; line-height:1.5;">
+          <strong data-i18n="notice_title">Notice:</strong> <span data-i18n="cit_notice_prefix">Submitting will record this document in the official Revenue Verification Queue under reference </span><span id="citRecordNumRef" style="font-weight:700; font-family:monospace;">LV-2026-XXXXX</span>. <span data-i18n="cit_notice_suffix">An authorized officer will inspect and cross-verify with village registers.</span>
+        </div>
+
+        <div>
+          <button type="button" class="btn btn-primary" id="btnCitizenSubmitRecord" style="width:100%; padding:12px; font-size:14px; font-weight:700; background:var(--color-emerald); border-color:var(--color-emerald);">
+            <span data-i18n="cit_submit_btn">✓ Submit Record for Official Officer Review</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIOUSLY SUBMITTED RECORDS TABLE -->
+  <div class="card" style="padding: 24px;">
+    <div class="card-header" style="border:none; padding:0 0 16px 0;">
+      <div>
+        <h3 class="card-title" data-i18n="cit_table_title">My Submitted Records & Revenue Verification Status</h3>
+        <p style="font-size:12px; color:var(--color-text-muted); margin-top:2px;" data-i18n="cit_table_desc">
+          Track status of documents submitted for verification (Pending, Verified, Needs Review, Rejected)
+        </p>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table" id="citizenRecordsTable">
+        <thead>
+          <tr>
+            <th data-i18n="th_record_id">Application ID</th>
+            <th data-i18n="th_owner_name">Owner Name</th>
+            <th data-i18n="th_survey_no">Survey No</th>
+            <th data-i18n="th_patta_no">Patta No</th>
+            <th data-i18n="th_village_district">Village / District</th>
+            <th data-i18n="th_submission_date">Submission Date</th>
+            <th data-i18n="th_status">Status</th>
+            <th data-i18n="th_officer_remarks">Officer Remarks</th>
+            <th data-i18n="th_seal">Application Tracking</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in citizen_records %}
+          <tr>
+            <td>
+              <a href="{{ url_for('record_detail', record_num=r.record_number) }}" style="color:var(--color-teal); font-family:monospace; font-weight:700;">
+                {{ r.record_number }}
+              </a>
+            </td>
+            <td><strong>{{ r.owner_name }}</strong></td>
+            <td><span style="font-family:monospace; font-weight:600;">{{ r.survey_number }}</span></td>
+            <td><span style="font-family:monospace; font-weight:600;">{{ r.patta_number }}</span></td>
+            <td>{{ r.village }}, {{ r.district }}</td>
+            <td style="font-size:12px; color:var(--color-text-muted);">{{ r.created_at[:10] if r.created_at else '2026-10-04' }}</td>
+            <td>
+              {% if r.status == 'APPROVED' or r.status == 'VERIFIED' %}
+                <span class="status-pill verified">APPROVED</span>
+              {% elif r.status == 'UNDER_REVIEW' or r.status == 'NEEDS_REVIEW' %}
+                <span class="status-pill saffron" style="background:var(--color-saffron-light); color:#b45309; font-weight:700;">UNDER REVIEW</span>
+              {% elif r.status == 'REJECTED' or r.status == 'POTENTIAL_ANOMALY' %}
+                <span class="status-pill danger" style="background:var(--color-danger-light); color:var(--color-danger); font-weight:700;">REJECTED</span>
+              {% else %}
+                <span class="status-pill pending">PENDING</span>
+              {% endif %}
+            </td>
+            <td style="font-size:12px; max-width:220px; line-height:1.4;">
+              {% if r.officer_remarks %}
+                <span style="color:var(--color-primary);">{{ r.officer_remarks }}</span>
+              {% elif r.status == 'APPROVED' or r.status == 'VERIFIED' %}
+                <span style="color:var(--color-emerald); font-weight:600;">All boundary checks approved.</span>
+              {% else %}
+                <span style="color:var(--color-text-muted); font-style:italic;">Pending officer review assignment</span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary btn-sm" style="padding:4px 8px; font-size:11px;" onclick="viewAppHistory('{{ r.record_number }}')">
+                  Track History
+                </button>
+                {% if r.status == 'VERIFIED' or r.status == 'APPROVED' %}
+                  <a href="{{ url_for('verify_public', record_num=r.record_number) }}" target="_blank" class="btn btn-secondary btn-sm" style="padding:4px 8px; font-size:11px; color:var(--color-emerald);" data-i18n="btn_view_qr">
+                    QR Seal
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" style="text-align:center; padding:30px; color:var(--color-text-muted);" data-i18n="empty_submitted_records">
+              No submitted applications found. Upload a document above to get started.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STATUS HISTORY MODAL -->
+  <div id="statusHistoryModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(23,26,58,0.5); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
+    <div class="card" style="max-width:550px; width:92%; padding:24px; max-height:85vh; overflow-y:auto; border-radius:8px; box-shadow:var(--shadow-md);">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-border); padding-bottom:12px; margin-bottom:16px;">
+        <div>
+          <h3 style="margin:0; font-size:16px; color:var(--color-primary);">Application Status & Remarks History</h3>
+          <span id="modalAppId" style="font-family:monospace; font-size:12px; color:var(--color-teal); font-weight:700;"></span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('statusHistoryModal').style.display='none'">✕</button>
+      </div>
+
+      <div id="modalHistoryContent" style="font-size:13px;">
+      </div>
+
+      <div style="margin-top:20px; text-align:right;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('statusHistoryModal').style.display='none'">Close</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let selectedFile = null;
+  let selectedSamplePath = null;
+  let currentProcessedData = null;
+  let currentZoom = 1;
+
+  const dropzone = document.getElementById('citDropzone');
+  const fileInput = document.getElementById('citFileInput');
+  const selectedFileCard = document.getElementById('citSelectedCard');
+  const fileNameEl = document.getElementById('citFileName');
+  const fileInfoEl = document.getElementById('citFileInfo');
+  const processBtn = document.getElementById('btnCitizenProcess');
+  const progressCard = document.getElementById('citProgressCard');
+  const progressText = document.getElementById('citProgressText');
+  const resultsSection = document.getElementById('citResultsSection');
+  const previewImg = document.getElementById('citPreviewImg');
+  const submitRecordBtn = document.getElementById('btnCitizenSubmitRecord');
+
+  // Drag and drop handlers
+  if (dropzone && fileInput) {
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files.length > 0) {
+        handleFile(fileInput.files[0]);
+      }
+    });
+  }
+
+  // Quick Preset Sample Buttons
+  document.querySelectorAll('.cit-sample-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedSamplePath = btn.dataset.filename;
+      selectedFile = null;
+      fileNameEl.textContent = btn.dataset.name;
+      fileInfoEl.textContent = window.t ? window.t('cit_preset_info', 'Preset Land Document · Local AI Verification') : 'Preset Land Document · Local AI Verification';
+      selectedFileCard.style.display = 'block';
+    });
+  });
+
+  function handleFile(file) {
+    selectedFile = file;
+    selectedSamplePath = null;
+    const mb = (file.size / (1024 * 1024)).toFixed(2);
+    fileNameEl.textContent = file.name;
+    fileInfoEl.textContent = `${file.type || 'Document'} · ${mb} MB`;
+    selectedFileCard.style.display = 'block';
+  }
+
+  // Process Document (Extract Text via Local OCR)
+  if (processBtn) {
+    processBtn.addEventListener('click', async () => {
+      if (!selectedFile && !selectedSamplePath) {
+        alert(window.t ? window.t('alert_select_file', 'Please select or upload a document file first.') : 'Please select or upload a document file first.');
+        return;
+      }
+
+      progressCard.style.display = 'block';
+      processBtn.disabled = true;
+      const processSpan = processBtn.querySelector('[data-i18n]') || processBtn;
+      processSpan.textContent = window.t ? window.t('processing_ocr_btn', 'Processing OCR...') : 'Processing OCR...';
+
+      const formData = new FormData();
+      if (selectedFile) {
+        formData.append('document', selectedFile);
+      } else if (selectedSamplePath) {
+        formData.append('sample_name', selectedSamplePath);
+      }
+
+      try {
+        const response = await fetch('/api/process-document', {
+          method: 'POST',
+          body: formData
+        });
+
+        const res = await response.json();
+        if (!res.success) {
+          throw new Error(res.error || 'Failed to extract text from document');
+        }
+
+        currentProcessedData = res.data;
+        renderResults(res.data);
+      } catch (err) {
+        const errPrefix = window.t ? window.t('alert_ocr_error', 'OCR Processing Error: ') : 'OCR Processing Error: ';
+        alert(errPrefix + err.message);
+      } finally {
+        progressCard.style.display = 'none';
+        processBtn.disabled = false;
+        processSpan.textContent = window.t ? window.t('cit_extract_btn', 'Extract Document Text (Local OCR)') : 'Extract Document Text (Local OCR)';
+      }
+    });
+  }
+
+  function renderResults(data) {
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+    if (previewImg && data.preview_url) {
+      previewImg.src = data.preview_url;
+    }
+
+    document.getElementById('citRecordNumRef').textContent = data.record_number;
+    document.getElementById('citConfBadge').textContent = `${data.overall_confidence}%`;
+
+    const fields = data.fields;
+    document.getElementById('c_owner_name').value = fields.owner_name || '';
+    document.getElementById('c_survey_number').value = fields.survey_number || '';
+    document.getElementById('c_subdivision_number').value = fields.subdivision_number || '';
+    document.getElementById('c_patta_number').value = fields.patta_number || '';
+    document.getElementById('c_district').value = fields.district || '';
+    document.getElementById('c_taluk').value = fields.taluk || '';
+    document.getElementById('c_village').value = fields.village || '';
+    document.getElementById('c_land_area').value = fields.land_area || '';
+    document.getElementById('c_document_type').value = fields.document_type || '';
+    document.getElementById('c_document_date').value = fields.document_date || '';
+
+    // Warnings if any
+    const warningBox = document.getElementById('citWarningBox');
+    if (data.anomalies && data.anomalies.length > 0) {
+      const att = window.t ? window.t('banner_attention', 'Attention:') : 'Attention:';
+      warningBox.style.display = 'block';
+      warningBox.innerHTML = `<strong>${att}</strong> ` + data.anomalies.map(a => `<div>⚠ ${a}</div>`).join('');
+    } else {
+      warningBox.style.display = 'none';
+    }
+  }
+
+  // Zoom controls for preview
+  const zIn = document.getElementById('btnCitZoomIn');
+  const zOut = document.getElementById('btnCitZoomOut');
+  const zReset = document.getElementById('btnCitZoomReset');
+  if (zIn) zIn.onclick = () => { currentZoom = Math.min(currentZoom + 0.25, 2.5); previewImg.style.transform = `scale(${currentZoom})`; };
+  if (zOut) zOut.onclick = () => { currentZoom = Math.max(currentZoom - 0.25, 0.5); previewImg.style.transform = `scale(${currentZoom})`; };
+  if (zReset) zReset.onclick = () => { currentZoom = 1; previewImg.style.transform = 'scale(1)'; };
+
+  // Submit to Officer Queue
+  if (submitRecordBtn) {
+    submitRecordBtn.addEventListener('click', async () => {
+      if (!currentProcessedData) return;
+
+      submitRecordBtn.disabled = true;
+      const submitSpan = submitRecordBtn.querySelector('[data-i18n]') || submitRecordBtn;
+      submitSpan.textContent = window.t ? window.t('cit_submitting_btn', 'Submitting Record...') : 'Submitting Record...';
+
+      const editedFields = {
+        owner_name: document.getElementById('c_owner_name').value.trim(),
+        survey_number: document.getElementById('c_survey_number').value.trim(),
+        subdivision_number: document.getElementById('c_subdivision_number').value.trim(),
+        patta_number: document.getElementById('c_patta_number').value.trim(),
+        district: document.getElementById('c_district').value.trim(),
+        taluk: document.getElementById('c_taluk').value.trim(),
+        village: document.getElementById('c_village').value.trim(),
+        land_area: document.getElementById('c_land_area').value.trim(),
+        document_type: document.getElementById('c_document_type').value.trim(),
+        document_date: document.getElementById('c_document_date').value.trim()
+      };
+
+      const payload = {
+        record_number: currentProcessedData.record_number,
+        fields: editedFields,
+        confidence_score: currentProcessedData.overall_confidence,
+        citizen_remarks: document.getElementById('c_remarks').value.trim() || 'Citizen online document submission',
+        anomaly_flags: currentProcessedData.anomalies || [],
+        duplicate_of_id: currentProcessedData.duplicate_info ? currentProcessedData.duplicate_info.record_number : null,
+        duplicate_similarity: currentProcessedData.duplicate_info ? currentProcessedData.duplicate_info.similarity : null
+      };
+
+      try {
+        const response = await fetch('/api/citizen-submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+        if (res.success) {
+          const successMsg = (window.t ? window.t('alert_submit_success_prefix', 'Document successfully submitted! Reference ID: ') : 'Document successfully submitted! Reference ID: ')
+            + res.record_number + '. '
+            + (window.t ? window.t('alert_status_pending', 'Status: PENDING.') : 'Status: PENDING.');
+          alert(successMsg);
+          window.location.reload();
+        } else {
+          alert((window.t ? window.t('alert_submit_error', 'Submission error: ') : 'Submission error: ') + res.error);
+        }
+      } catch (err) {
+        alert((window.t ? window.t('alert_submit_failed', 'Failed to submit document: ') : 'Failed to submit document: ') + err.message);
+      } finally {
+        submitRecordBtn.disabled = false;
+        submitSpan.textContent = window.t ? window.t('cit_submit_btn', '✓ Submit Record for Official Officer Review') : '✓ Submit Record for Official Officer Review';
+      }
+    });
+  }
+
+  // Quick Patta Search
+  const btnSearch = document.getElementById('btnSearchPatta');
+  const searchInput = document.getElementById('pattaSearchInput');
+  const searchResult = document.getElementById('pattaSearchResult');
+  let lastFoundRecord = null;
+
+  function renderPattaResult(r) {
+    const isTa = (window.getLang && window.getLang() === 'ta');
+    const titleText = isTa ? `✓ அதிகாரப்பூர்வ பதிவு கண்டறியப்பட்டது: ${r.record_number}` : `✓ Official Record Found: ${r.record_number}`;
+    const ownerLabel = isTa ? "உரிமையாளர்:" : "Owner:";
+    const surveyLabel = isTa ? "சர்வே எண்:" : "Survey No:";
+    const pattaLabel = isTa ? "பட்டா எண்:" : "Patta:";
+    const locLabel = isTa ? "இடம்:" : "Location:";
+    const areaLabel = isTa ? "பரப்பளவு:" : "Area:";
+    const statusLabel = isTa ? "சரிபார்ப்பு நிலை:" : "Status:";
+    const viewBtnText = isTa ? "முழு விவரங்களையும் பார்க்கவும்" : "View Complete Record Details";
+    const statusText = isTa ? (r.status === 'VERIFIED' ? 'சரிபார்க்கப்பட்டது' : 'நிலுவையில்') : r.status;
+
+    searchResult.innerHTML = `
+      <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:14px;">
+        <div style="font-size:13px; font-weight:700; color:#166534; margin-bottom:6px;">${titleText}</div>
+        <div style="font-size:12.5px; line-height:1.6; color:#14532D;">
+          <strong>${ownerLabel}</strong> ${r.owner_name} · <strong>${surveyLabel}</strong> ${r.survey_number} · <strong>${pattaLabel}</strong> ${r.patta_number}<br>
+          <strong>${locLabel}</strong> ${r.village}, ${r.taluk}, ${r.district} · <strong>${areaLabel}</strong> ${r.land_area}<br>
+          <strong>${statusLabel}</strong> <span class="status-pill ${r.status == 'VERIFIED' ? 'verified' : 'pending'}">${statusText}</span>
+        </div>
+        <div style="margin-top:8px;">
+          <a href="/record/${r.record_number}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:11px;">${viewBtnText}</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPattaNotFound(q) {
+    const isTa = (window.getLang && window.getLang() === 'ta');
+    const notFoundText = isTa 
+      ? `பட்டா #${q}-க்குரிய பதிவு எதுவும் கிடைக்கவில்லை. தயவுசெய்து எண்ணைச் சரிபார்க்கவும் அல்லது மேலே உள்ள படிவத்தில் உங்கள் ஆவணத்தைப் பதிவேற்றவும்.`
+      : `No registered cadastral record found matching Patta #${q}. Please check the number or upload your document above.`;
+
+    searchResult.innerHTML = `
+      <div style="background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:14px; font-size:13px; color:#991B1B;">
+        ${notFoundText}
+      </div>
+    `;
+  }
+
+  if (btnSearch && searchInput) {
+    btnSearch.addEventListener('click', async () => {
+      const q = searchInput.value.trim();
+      if (!q) return;
+      try {
+        const res = await fetch(`/api/search-patta?patta=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        searchResult.style.display = 'block';
+        if (data.found && data.record) {
+          lastFoundRecord = data.record;
+          renderPattaResult(data.record);
+        } else {
+          lastFoundRecord = null;
+          renderPattaNotFound(q);
+        }
+      } catch (e) {
+        alert((window.t ? window.t('alert_search_failed', 'Search failed: ') : 'Search failed: ') + e.message);
+      }
+    });
+  window.viewAppHistory = async function(recNum) {
+    const modal = document.getElementById('statusHistoryModal');
+    const modalContent = document.getElementById('modalHistoryContent');
+    const modalAppId = document.getElementById('modalAppId');
+    if (!modal || !modalContent) return;
+
+    modalAppId.textContent = recNum;
+    modalContent.innerHTML = '<div style="text-align:center; padding:20px; color:var(--color-text-muted);">Loading status history...</div>';
+    modal.style.display = 'flex';
+
+    try {
+      const res = await fetch('/api/application-history/' + encodeURIComponent(recNum));
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to load history');
+
+      let statusPillClass = 'pending';
+      if (data.current_status === 'APPROVED' || data.current_status === 'VERIFIED') statusPillClass = 'verified';
+      else if (data.current_status === 'UNDER_REVIEW' || data.current_status === 'NEEDS_REVIEW') statusPillClass = 'saffron';
+      else if (data.current_status === 'REJECTED') statusPillClass = 'danger';
+
+      let html = `
+        <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); padding:12px; border-radius:6px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong>${data.owner_name}</strong>
+            <span class="status-pill ${statusPillClass}" style="font-size:11px; font-weight:700;">${data.current_status}</span>
+          </div>
+          <div style="font-size:12px; color:var(--color-text-muted); margin-bottom:4px;">
+            Survey #${data.survey_number} · Patta #${data.patta_number} · ${data.village}, ${data.district}
+          </div>
+          ${data.officer_remarks ? `<div style="font-size:12.5px; color:var(--color-primary); margin-top:8px; padding-top:6px; border-top:1px dashed var(--color-border);"><strong>Officer Remarks:</strong> ${data.officer_remarks}</div>` : ''}
+        </div>
+        <div style="font-size:12px; font-weight:700; color:var(--color-primary); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">Verification Event Timeline</div>
+        <div style="border-left:2px solid var(--color-teal); padding-left:14px; margin-left:6px;">
+      `;
+
+      if (data.history && data.history.length > 0) {
+        data.history.forEach((h, idx) => {
+          html += `
+            <div style="margin-bottom:16px; position:relative;">
+              <div style="font-weight:700; font-size:13px; color:var(--color-primary);">${h.action.replace(/_/g, ' ')}</div>
+              <div style="font-size:11px; color:var(--color-text-muted);">${h.timestamp} · Handled by: ${h.officer_name}</div>
+              ${h.remarks ? `<div style="font-size:12px; margin-top:3px; color:#374151; background:#f8fafc; padding:6px 10px; border-radius:4px; border:1px solid #e2e8f0;">"${h.remarks}"</div>` : ''}
+            </div>
+          `;
+        });
+      } else {
+        html += `<div style="color:var(--color-text-muted); font-size:12.5px;">Initial application submitted. Pending revenue officer review.</div>`;
+      }
+      html += `</div>`;
+      modalContent.innerHTML = html;
+    } catch (err) {
+      modalContent.innerHTML = `<div style="color:var(--color-danger); padding:10px; background:var(--color-danger-light); border-radius:6px;">${err.message}</div>`;
+    }
+  };
+
+  // Re-render dynamic components upon language switch
+  window.addEventListener('landvault:langchange', () => {
+    if (selectedSamplePath && fileNameEl) {
+      fileInfoEl.textContent = window.t('cit_preset_info', 'Preset Land Document · Local AI Verification');
+    }
+    if (lastFoundRecord) {
+      renderPattaResult(lastFoundRecord);
+    }
+  });
+});
+</script>
+{% endblock %}
